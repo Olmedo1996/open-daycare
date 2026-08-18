@@ -1,6 +1,6 @@
 # SPEC 01 — Feed como home
 
-> **Estado:** Borrador
+> **Estado:** Aprobado
 > **Depende de:** Ninguna
 > **Fecha:** 2026-08-17
 > **Objetivo:** Implementar la pantalla Feed de `references/pantallas/feed.dc.html` como home (`/`) responsive, visualmente idéntica al comp en desktop, con datos hardcodeados, sin autenticación ni base de datos.

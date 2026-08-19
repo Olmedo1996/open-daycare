@@ -18,7 +18,7 @@ export const posts: Post[] = [
     authorName: "Mateo",
     timeLabel: "14:20",
     type: "achievement",
-    recipientLabel: "Para: familia de Mateo",
+    recipientLabel: "familia de Mateo",
     text: "¡Usó el orinal solito por primera vez! Estaba feliz de contárselo a todos. Un gran paso.",
     likes: 3,
     comments: 1,

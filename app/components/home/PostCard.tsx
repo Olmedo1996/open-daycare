@@ -26,7 +26,7 @@ export function PostCard({ post }: PostCardProps) {
           tone={AVATAR_TONE[post.type]}
           className="h-11 w-11 text-[17px]"
         />
-        <div className="flex-1">
+        <div className="min-w-0 flex-1">
           <div className="font-display text-[16.5px] font-semibold text-ink">
             {post.authorName}
           </div>

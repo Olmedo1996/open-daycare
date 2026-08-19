@@ -29,12 +29,23 @@ Tailwind v4 runs via `@tailwindcss/postcss`. There is no `tailwind.config.*`; th
 
 `references/pantallas/*.dc.html` are self-contained design comps (Fredoka + Nunito fonts, palette bg `#FBF4EC`); `references/screenshots/*.png` are previews. Screen names are Spanish (`login`, `feed`, `crear-publicacion`, `ninos`, ...). Build UI against these rather than inventing a theme, and keep copy in Spanish.
 
-## MCPs / conventions
+## MCPs
 
-- Playwright screenshots and anything Playwright-related go in `.playwright-mcp/`.
 - Use the Context7 MCP for up-to-date framework documentation.
+- Playwright MCP for browser automation and screenshots.
+
+## Conventions
+
 - Next.js 16 uses typed routes — `app/layout.tsx` already does `LayoutProps<"/">`. Check `node_modules/next/dist/docs/` for current conventions.
+- Playwright screenshots and anything Playwright-related go in `.playwright-mcp/`.
+
+## Spec-driven development
+
 - Use spec-driven development for features: `/spec` to write the spec, then `/spec-impl` to implement it (skills in `.agents/skills/`).
+
+## Agents
+
+- `spec-verifier` (`.opencode/agent/spec-verifier.md`): verifies acceptance criteria of a spec — reviews the implementation, fixes code/spec issues found, and marks the checkboxes. Uses Playwright (vision) to compare against `references/screenshots/` and Context7 for Next.js practices.
 
 ## Reglas de código 
 

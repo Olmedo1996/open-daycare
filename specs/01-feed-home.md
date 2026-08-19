@@ -1,6 +1,6 @@
 # SPEC 01 — Feed como home
 
-> **Estado:** Aprobado
+> **Estado:** Implementado
 > **Depende de:** Ninguna
 > **Fecha:** 2026-08-17
 > **Objetivo:** Implementar la pantalla Feed de `references/pantallas/feed.dc.html` como home (`/`) responsive, visualmente idéntica al comp en desktop, con datos hardcodeados, sin autenticación ni base de datos.
@@ -62,18 +62,18 @@ Convenciones: nomenclatura interna en inglés (tipos, variables, funciones) mien
 
 ## Criterios de aceptación
 
-- [ ] `/` renderiza sin errores de consola con `pnpm dev`.
-- [ ] A ≥1024px el layout es idéntico al comp: sidebar 248px sticky, fondo `#FFFDF9`, Feed activo (`#FBE3D8`/`#D9583C`), botón gradiente "Nueva publicación", usuario "Caro Giménez · Maestra · Soles".
-- [ ] A <1024px se ve top bar con logo y hamburguesa; al tocarla se abre el drawer overlay sobre backdrop semitransparente; tocar backdrop o X cierra.
-- [ ] No hay scroll horizontal en ningún ancho (probar 320px, 768px, 1280px, 1920px).
-- [ ] Ningún link/botón navega (sin 404): nav, Nueva publicación, Editar, comentarios, foto, cerrar sesión.
-- [ ] Header con "GUARDERÍA · SALA SOLES", "Buenas, Caro" (Fredoka 30px) y "12 niños · martes 17 jun" fijo.
-- [ ] Los 3 posts en orden (logro 14:20, actividad 09:40 con placeholder de foto, anuncio 07:50) con badges y contadores exactos (3/1, 5/2, 8/0).
-- [ ] Fredoka y Nunito cargan vía `next/font` (sin `<link>` a Google Fonts).
-- [ ] Estructura: `app/components/shared/` (Sidebar, MobileHeader, Avatar, Badge, iconos) y `app/components/home/` (Composer, PostCard); datos en `app/data/posts.ts`.
-- [ ] Solo `MobileHeader` es client component; el resto server components.
-- [ ] `pnpm lint`, `pnpm exec tsc --noEmit` y `pnpm build` pasan.
-- [ ] No queda rastro del boilerplate de create-next-app.
+- [x] `/` renderiza sin errores de consola con `pnpm dev`.
+- [x] A ≥1024px el layout es idéntico al comp: sidebar 248px sticky, fondo `#FFFDF9`, Feed activo (`#FBE3D8`/`#D9583C`), botón gradiente "Nueva publicación", usuario "Caro Giménez · Maestra · Soles".
+- [x] A <1024px se ve top bar con logo y hamburguesa; al tocarla se abre el drawer overlay sobre backdrop semitransparente; tocar backdrop o X cierra.
+- [x] No hay scroll horizontal en ningún ancho (probar 320px, 768px, 1280px, 1920px).
+- [x] Ningún link/botón navega (sin 404): nav, Nueva publicación, Editar, comentarios, foto, cerrar sesión.
+- [x] Header con "GUARDERÍA · SALA SOLES", "Buenas, Caro" (Fredoka 30px) y "12 niños · martes 17 jun" fijo.
+- [x] Los 3 posts en orden (logro 14:20, actividad 09:40 con placeholder de foto, anuncio 07:50) con badges y contadores exactos (3/1, 5/2, 8/0).
+- [x] Fredoka y Nunito cargan vía `next/font` (sin `<link>` a Google Fonts).
+- [x] Estructura: `app/components/shared/` (Sidebar, MobileHeader, Avatar, Badge, iconos) y `app/components/home/` (Composer, PostCard); datos en `app/data/posts.ts`.
+- [x] Solo `MobileHeader` es client component; el resto server components.
+- [x] `pnpm lint`, `pnpm exec tsc --noEmit` y `pnpm build` pasan.
+- [x] No queda rastro del boilerplate de create-next-app.
 
 ## Decisiones
 

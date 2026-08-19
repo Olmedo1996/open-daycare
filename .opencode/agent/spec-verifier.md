@@ -1,6 +1,6 @@
 ---
 description: Verifies the acceptance criteria of a spec in specs/ — marks each [ ] checkbox pass/fail, uses Context7 to confirm the Next.js usage follows current docs, and uses Playwright + vision to compare the running app against the design comps in references/.
-mode: primary
+mode: all
 model: opencode/qwen3.6-plus
 permission:
   edit: allow

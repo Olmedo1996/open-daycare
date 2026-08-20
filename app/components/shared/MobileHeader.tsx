@@ -1,11 +1,16 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import { Avatar } from "./Avatar";
 import { CloseIcon, LogOutIcon, MenuIcon, PlusIcon, SunIcon } from "./icons";
-import { NAV_ITEMS } from "./nav-items";
+import { isNavItemActive, NAV_ITEMS } from "./nav-items";
 
-export function MobileHeader() {
+type MobileHeaderProps = {
+  activePath: string;
+};
+
+export function MobileHeader({ activePath }: MobileHeaderProps) {
   const [open, setOpen] = useState(false);
   const close = () => setOpen(false);
 
@@ -80,20 +85,36 @@ export function MobileHeader() {
             <nav className="flex flex-1 flex-col gap-1">
               {NAV_ITEMS.map((item) => {
                 const Icon = item.icon;
-                return (
+                const active = isNavItemActive(item, activePath);
+                const className = `flex items-center gap-3 rounded-xl px-3 py-[11px] text-[14.5px] ${
+                  active
+                    ? "bg-active-bg font-extrabold text-accent"
+                    : "font-semibold text-muted-deep"
+                }`;
+                const content = (
+                  <>
+                    <Icon className="h-[19px] w-[19px]" />
+                    {item.label}
+                  </>
+                );
+                return item.href === "#" ? (
                   <a
                     key={item.label}
                     href="#"
                     onClick={close}
-                    className={`flex items-center gap-3 rounded-xl px-3 py-[11px] text-[14.5px] ${
-                      item.active
-                        ? "bg-active-bg font-extrabold text-accent"
-                        : "font-semibold text-muted-deep"
-                    }`}
+                    className={className}
                   >
-                    <Icon className="h-[19px] w-[19px]" />
-                    {item.label}
+                    {content}
                   </a>
+                ) : (
+                  <Link
+                    key={item.label}
+                    href={item.href}
+                    onClick={close}
+                    className={className}
+                  >
+                    {content}
+                  </Link>
                 );
               })}
             </nav>

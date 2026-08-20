@@ -37,6 +37,29 @@
   --color-warn: #4e72c8;
   --color-kid-bg: #a9d9e8;
   --color-kid: #1f7a93;
+
+  --color-rose-bg: #f4b8cc;
+  --color-rose: #c44a7a;
+  --color-mint-bg: #b9dec4;
+  --color-mint: #3e8b62;
+  --color-gold-bg: #f4dc8e;
+  --color-gold: #9a7b1e;
+  --color-violet-bg: #c9b6e8;
+  --color-violet: #7b5fc0;
+  --color-steel-bg: #a9c7e8;
+
+  --color-peanut-bg: #fbd8cc;
+  --color-peanut: #d9684a;
+  --color-vincular-bg: #f9d2de;
+  --color-vincular: #c56486;
+  --color-pending-bg: #f7e7a6;
+  --color-pending: #9a7b1e;
+
+  --color-alert-bg: #fbdad6;
+  --color-alert-icon: #f4a8a0;
+  --color-alert-title: #c5413a;
+  --color-alert-text: #b25249;
+  --color-kid-hover: #f2a78e;
 }
 
 body {

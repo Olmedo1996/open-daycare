@@ -1,8 +1,13 @@
+import Link from "next/link";
 import { Avatar } from "./Avatar";
 import { LogOutIcon, PlusIcon, SunIcon } from "./icons";
-import { NAV_ITEMS } from "./nav-items";
+import { isNavItemActive, NAV_ITEMS } from "./nav-items";
 
-export function Sidebar() {
+type SidebarProps = {
+  activePath: string;
+};
+
+export function Sidebar({ activePath }: SidebarProps) {
   return (
     <aside className="sticky top-0 hidden h-screen w-[248px] flex-none flex-col border-r border-line bg-surface px-4 py-6 lg:flex">
       <a href="#" className="flex items-center gap-[11px] px-2 pb-[22px] pt-1">
@@ -30,19 +35,26 @@ export function Sidebar() {
       <nav className="flex flex-1 flex-col gap-1">
         {NAV_ITEMS.map((item) => {
           const Icon = item.icon;
-          return (
-            <a
-              key={item.label}
-              href="#"
-              className={`flex items-center gap-3 rounded-xl px-3 py-[11px] text-[14.5px] ${
-                item.active
-                  ? "bg-active-bg font-extrabold text-accent"
-                  : "font-semibold text-muted-deep"
-              }`}
-            >
+          const active = isNavItemActive(item, activePath);
+          const className = `flex items-center gap-3 rounded-xl px-3 py-[11px] text-[14.5px] ${
+            active
+              ? "bg-active-bg font-extrabold text-accent"
+              : "font-semibold text-muted-deep"
+          }`;
+          const content = (
+            <>
               <Icon className="h-[19px] w-[19px]" />
               {item.label}
+            </>
+          );
+          return item.href === "#" ? (
+            <a key={item.label} href="#" className={className}>
+              {content}
             </a>
+          ) : (
+            <Link key={item.label} href={item.href} className={className}>
+              {content}
+            </Link>
           );
         })}
       </nav>

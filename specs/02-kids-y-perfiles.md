@@ -1,6 +1,6 @@
 # SPEC 02 — Gestión de niños y perfil
 
-> **Estado:** Aprobado
+> **Estado:** Implementado
 > **Depende de:** SPEC 01
 > **Fecha:** 2026-08-19
 > **Objetivo:** Implementar las pantallas Niños (`/kids`) y Perfil de niño (`/kids/[slug]`) de `references/pantallas/ninos.dc.html` y `perfil-nino.dc.html`, con datos mock y reutilizando el shell y los componentes compartidos de SPEC 01.
@@ -52,6 +52,7 @@ export type Kid = {
   avatarTone: KidAvatarTone;
   ageLabel: string;      // "3 años"
   pill: KidPill;         // null → chevron
+  pillLabel?: string;    // "MANÍ" | "LACTOSA" | "VINCULAR" cuando pill no es null
   notes?: string;        // texto del banner "Alergias y notas" (opcional)
   birthDate: string;     // "12 mar 2022"
   room: string;          // "Soles"
@@ -60,7 +61,7 @@ export type Kid = {
 };
 ```
 
-Convenciones: el subtítulo de la tarjeta se deriva de `parents.length` ("sin padres vinculados" / "1 padre vinculado" / "N padres vinculados"); el contador "8 niños" se deriva de `kids.length`; nomenclatura interna en inglés con copy visible en español (el pill se mapea: `danger` → "MANÍ"/"LACTOSA", `link` → "VINCULAR", `active` → "ACTIVA", `pending` → "PENDIENTE"). Sala = "Soles" para los 8. Solo Mateo tiene perfil renderizado en el comp; el resto se inventa siguiendo el mismo patrón.
+Convenciones: el subtítulo de la tarjeta se deriva de `parents.length` ("sin padres vinculados" / "1 padre vinculado" / "N padres vinculados"); el contador "8 niños" se deriva de `kids.length`; nomenclatura interna en inglés con copy visible en español (`pill` define el tono, `pillLabel` el texto: "MANÍ"/"LACTOSA" → danger, "VINCULAR" → link; `active` → "ACTIVA", `pending` → "PENDIENTE"). Sala = "Soles" para los 8. Solo Mateo tiene perfil renderizado en el comp; el resto se inventa siguiendo el mismo patrón.
 
 ## Plan de implementación
 
@@ -80,20 +81,20 @@ Convenciones: el subtítulo de la tarjeta se deriva de `parents.length` ("sin pa
 
 ## Criterios de aceptación
 
-- [ ] `/kids` y `/kids/[slug]` renderizan sin errores de consola con `pnpm dev`.
-- [ ] A ≥1024px `/kids` es idéntico al comp: sidebar con Niños activo (`#FBE3D8`/`#D9583C`), eyebrow "GESTIÓN", título "Niños", botón gradiente "Agregar niño", input de búsqueda, sección "SALA SOLES · 8 niños", grilla de 2 columnas.
-- [ ] Las 8 tarjetas muestran avatar con inicial y color del comp (Mateo sky, Sofía rose, Benjamín mint, Valentina gold, Tomás violet, Emma rose, Lucas sky, Olivia mint), "N años · X padres vinculados" y pill/chevron correctos (MANÍ Mateo, VINCULAR Valentina, LACTOSA Tomás; chevron el resto).
-- [ ] Tipear en "Buscar niño…" filtra la grilla por nombre (insensible a mayúsculas); vacío restaura las 8.
-- [ ] A <1024px la grilla es 1 columna y el drawer abre con Niños activo.
-- [ ] Clic en una tarjeta navega a `/kids/{slug}` y el sidebar mantiene Niños activo.
-- [ ] `/kids/mateo-fernandez` es idéntico al comp: volver a Niños, avatar 84px, "Mateo Fernández", "3 años · Sala Soles", Editar, banner de alergias con texto exacto, filas "12 mar 2022"/"Soles"/"feb 2025", botón oscuro "Resumen del día", PADRES VINCULADOS con Lucía ACTIVA y Diego PENDIENTE, link "Vincular otro padre".
-- [ ] Los otros 7 slugs abren un perfil coherente; el banner de alergias solo aparece cuando el niño tiene `notes`.
-- [ ] Slug inexistente → 404 de Next (`notFound()`).
-- [ ] El feed `/` queda visualmente idéntico tras el refactor de AppShell.
-- [ ] Links fuera de alcance no navegan: Agregar niño, Editar, Resumen del día, Vincular otro padre, Avisos, Mi cuenta (sin 404).
-- [ ] `pnpm lint`, `pnpm exec tsc --noEmit` y `pnpm build` pasan.
-- [ ] Estructura: `app/components/shared/` (AppShell, Sidebar, MobileHeader, Avatar, Pill, Badge intacto, nav-items, icons) y `app/components/kids/` (KidCard, SearchBox, AllergyNotes, KidInfoCard, ParentList); datos en `app/data/kids.ts`.
-- [ ] Solo `SearchBox` y `MobileHeader` son client components; el resto server.
+- [x] `/kids` y `/kids/[slug]` renderizan sin errores de consola con `pnpm dev`.
+- [x] A ≥1024px `/kids` es idéntico al comp: sidebar con Niños activo (`#FBE3D8`/`#D9583C`), eyebrow "GESTIÓN", título "Niños", botón gradiente "Agregar niño", input de búsqueda, sección "SALA SOLES · 8 niños", grilla de 2 columnas.
+- [x] Las 8 tarjetas muestran avatar con inicial y color del comp (Mateo sky, Sofía rose, Benjamín mint, Valentina gold, Tomás violet, Emma rose, Lucas sky, Olivia mint), "N años · X padres vinculados" y pill/chevron correctos (MANÍ Mateo, VINCULAR Valentina, LACTOSA Tomás; chevron el resto).
+- [x] Tipear en "Buscar niño…" filtra la grilla por nombre (insensible a mayúsculas); vacío restaura las 8.
+- [x] A <1024px la grilla es 1 columna y el drawer abre con Niños activo.
+- [x] Clic en una tarjeta navega a `/kids/{slug}` y el sidebar mantiene Niños activo.
+- [x] `/kids/mateo-fernandez` es idéntico al comp: volver a Niños, avatar 84px, "Mateo Fernández", "3 años · Sala Soles", Editar, banner de alergias con texto exacto, filas "12 mar 2022"/"Soles"/"feb 2025", botón oscuro "Resumen del día", PADRES VINCULADOS con Lucía ACTIVA y Diego PENDIENTE, link "Vincular otro padre".
+- [x] Los otros 7 slugs abren un perfil coherente; el banner de alergias solo aparece cuando el niño tiene `notes`.
+- [x] Slug inexistente → 404 de Next (`notFound()`).
+- [x] El feed `/` queda visualmente idéntico tras el refactor de AppShell.
+- [x] Links fuera de alcance no navegan: Agregar niño, Editar, Resumen del día, Vincular otro padre, Avisos, Mi cuenta (sin 404).
+- [x] `pnpm lint`, `pnpm exec tsc --noEmit` y `pnpm build` pasan.
+- [x] Estructura: `app/components/shared/` (AppShell, Sidebar, MobileHeader, Avatar, Pill, Badge intacto, nav-items, icons) y `app/components/kids/` (KidCard, SearchBox, AllergyNotes, KidInfoCard, ParentList); datos en `app/data/kids.ts`.
+- [x] Solo `SearchBox` y `MobileHeader` son client components; el resto server.
 
 ## Decisiones
 
@@ -103,6 +104,7 @@ Convenciones: el subtítulo de la tarjeta se deriva de `parents.length` ("sin pa
 - **Sí:** mock completo para los 8 niños — todas las tarjetas enlazan a un perfil funcional.
 - **Sí:** slug kebab-case + `notFound()` — URLs legibles y degradación limpia.
 - **Sí:** `Pill` nueva sin tocar `Badge` — el Badge del feed lleva punto y su tipo está acoplado a `PostType`; no se arriesga el feed.
+- **Sí:** `pillLabel` además de `pill` — el modelo original (`danger`/`link`/`null`) no distinguía MANÍ de LACTOSA; el label resuelve el texto visible sin duplicar el tono.
 - **Sí:** `Avatar` extendido con paleta — mismo componente, tonos por niño/padre, vía tokens.
 - **Sí:** colores nuevos como tokens en `@theme` — consistente con el sistema de SPEC 01.
 - **Sí:** `activePath` como prop desde la página (sin `usePathname`) — Sidebar sigue siendo server component; cero estado extra.

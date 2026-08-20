@@ -141,3 +141,37 @@ export function CloseIcon(props: SVGProps<SVGSVGElement>) {
     </SvgIcon>
   );
 }
+
+export function ChevronRightIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <SvgIcon strokeWidth={2.2} {...props}>
+      <path d="m9 18 6-6-6-6" />
+    </SvgIcon>
+  );
+}
+
+export function SearchIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <SvgIcon {...props}>
+      <circle cx="11" cy="11" r="7" />
+      <path d="m21 21-4.3-4.3" />
+    </SvgIcon>
+  );
+}
+
+export function AlertIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <SvgIcon strokeWidth={2.2} {...props}>
+      <path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z" />
+      <path d="M12 9v4M12 17h.01" />
+    </SvgIcon>
+  );
+}
+
+export function EditIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <SvgIcon {...props}>
+      <path d="M17 3a2.8 2.8 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5z" />
+    </SvgIcon>
+  );
+}

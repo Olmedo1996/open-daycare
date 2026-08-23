@@ -1,35 +1,39 @@
-import { Composer } from "@/app/components/home/Composer";
-import { PostCard } from "@/app/components/home/PostCard";
-import { AppShell } from "@/app/components/shared/AppShell";
-import { posts } from "@/app/data/posts";
+'use client';
+
+import { useState } from 'react';
+import { posts } from "@/app/_data/mock";
+import { Sidebar } from "@/components/shared/Sidebar";
+import { MobileNav } from "@/components/shared/MobileNav";
+import { FeedHeader } from "@/components/home/FeedHeader";
+import { Composer } from "@/components/home/Composer";
+import { FeedDivider } from "@/components/home/FeedDivider";
+import { PostCard } from "@/components/home/PostCard";
+import { NewPostModal } from "@/components/home/NewPostModal";
 
 export default function Home() {
+  const [showNewPost, setShowNewPost] = useState(false);
+
   return (
-    <AppShell activePath="/" maxWidth={760}>
-      <header className="mb-6">
-        <div className="mb-1 text-[12.5px] font-extrabold tracking-[0.8px] text-accent">
-          GUARDERÍA · SALA SOLES
+    <div className="flex flex-1 min-h-screen bg-canvas">
+      <Sidebar pathname="/" onOpenNewPost={() => setShowNewPost(true)} />
+      <MobileNav pathname="/" />
+      <main className="flex-1 min-w-0 h-screen overflow-y-auto">
+        <div className="max-w-[760px] w-full mx-auto px-5 md:px-10 pt-16 md:pt-[34px] pb-20">
+          <FeedHeader />
+          <Composer />
+          <FeedDivider />
+          <div className="flex flex-col gap-4">
+            {posts.map((post) => (
+              <PostCard key={post.id} post={post} />
+            ))}
+          </div>
         </div>
-        <h1 className="font-display text-[30px] font-semibold text-ink">
-          Buenas, Caro
-        </h1>
-        <p className="mt-[5px] text-[14.5px] text-muted">12 niños · martes 17 jun</p>
-      </header>
-
-      <Composer />
-
-      <div className="mb-3.5 flex items-center gap-3.5">
-        <span className="text-[12.5px] font-extrabold tracking-[0.8px] text-faint">
-          PUBLICADO HOY
-        </span>
-        <span className="h-px flex-1 bg-divider" />
-      </div>
-
-      <div className="flex flex-col gap-4">
-        {posts.map((post) => (
-          <PostCard key={post.id} post={post} />
-        ))}
-      </div>
-    </AppShell>
+      </main>
+      <NewPostModal
+        open={showNewPost}
+        onClose={() => setShowNewPost(false)}
+        onPublish={() => setShowNewPost(false)}
+      />
+    </div>
   );
 }

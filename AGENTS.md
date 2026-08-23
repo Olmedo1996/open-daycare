@@ -2,51 +2,44 @@
 
 # This is NOT the Next.js you know
 
-This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
-
-This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` before writing any code. Heed deprecation notices.
 
 <!-- END:nextjs-agent-rules -->
 
-# Open Daycare
+## Commands
 
-Daycare app for families/teachers; UI copy is Spanish. Next.js 16 App Router, currently still a fresh `create-next-app` scaffold (`app/` is boilerplate, so most work is greenfield).
+- `npm run dev` — dev server at http://localhost:3000
+- `npm run lint` — runs `eslint` (flat config, ESLint 9). This is **not** `next lint`; don't run `next lint`.
+- Typecheck: `npx tsc --noEmit` (there is no `typecheck` script).
+- No test framework is configured — don't invent test commands.
 
-## Commands (pnpm only)
+## Stack notes
 
-- `pnpm dev` — dev server on http://localhost:3000
-- `pnpm build` / `pnpm start` — prod build / serve
-- `pnpm lint` — ESLint flat config (`eslint` directly, not `next lint`)
-- Typecheck: `pnpm exec tsc --noEmit` — there is **no** `typecheck` or test script in `package.json`
+- Next.js 16.2.10 (App Router) + React 19.2.4. TypeScript strict, `noEmit`, `moduleResolution: bundler`.
+- Path alias `@/*` maps to the repo root (`./*`), not `src/`.
+- Tailwind CSS v4: configured inline via `@import "tailwindcss"` + `@theme` in `app/globals.css` and the `@tailwindcss/postcss` plugin. There is **no** `tailwind.config.ts`; do not create one.
 
-Package manager is pinned to `pnpm@11.5.2` (`packageManager` field, committed `pnpm-lock.yaml`). Use pnpm, not npm/yarn/bun.
+## Project context
 
-## Tailwind v4 — no config file
-
-Tailwind v4 runs via `@tailwindcss/postcss`. There is no `tailwind.config.*`; theme tokens live in CSS using `@theme inline` in `app/globals.css`. Extend the design system there, not in a JS config.
-
-## Design source of truth
-
-`references/pantallas/*.dc.html` are self-contained design comps (Fredoka + Nunito fonts, palette bg `#FBF4EC`); `references/screenshots/*.png` are previews. Screen names are Spanish (`login`, `feed`, `crear-publicacion`, `ninos`, ...). Build UI against these rather than inventing a theme, and keep copy in Spanish.
+- `open-daycare`: a Spanish-language daycare management app (staff + family/parent flows). UI copy is in Spanish.
+- `app/page.tsx` is still the default create-next-app scaffold — the real UI has not been built yet.
+- `references/pantallas/*.dc.html` are the design source of truth for each screen; open `references/pantallas/index.dc.html` for the catalog of 15 screens. `references/screenshots/*.png` are rendered previews. Implement against these: fonts are Fredoka (headings) + Nunito (body) on a warm palette (background `#f6ecdf`, accent `#d9583c`/`#f2937a`, staff blue `#2e89a6`, family purple `#7b5fc0`).
 
 ## MCPs
 
-- Use the Context7 MCP for up-to-date framework documentation.
-- Playwright MCP for browser automation and screenshots.
-
-## Conventions
-
-- Next.js 16 uses typed routes — `app/layout.tsx` already does `LayoutProps<"/">`. Check `node_modules/next/dist/docs/` for current conventions.
-- Playwright screenshots and anything Playwright-related go in `.playwright-mcp/`.
-
-## Spec-driven development
-
-- Use spec-driven development for features: `/spec` to write the spec, then `/spec-impl` to implement it (skills in `.agents/skills/`).
+- Playwright: screenshots and any Playwright output go in `.playwright-mcp/` (gitignored).
+- Context7: use it to fetch current framework docs instead of relying on training data.
 
 ## Agents
 
-- `spec-verifier` (`.opencode/agent/spec-verifier.md`): verifies acceptance criteria of a spec — reviews the implementation, fixes code/spec issues found, and marks the checkboxes. Uses Playwright (vision) to compare against `references/screenshots/` and Context7 for Next.js practices.
+- `spec-verifier`: Verifies acceptance criteria of a spec file. Reviews implementation against each criterion, fixes code/spec issues found, and marks checkboxes. Uses Playwright MCP with vision to compare screenshots against references, and Context7 MCP to validate Next.js best practices.
 
-## Reglas de código 
+## Spec Driven Development - Skills
 
-- Usar código limpio, nombres, funciones y variables, etc. en inglés 
+- /spec Usaremos esta habilidad para crear las especificaciones.
+- /spec-impl Usaremos esta skill para hacer las implementaciones.
+- /verify-spec Usaremos este comando para verificar los criterios de aceptación de una spec.
+
+## Reglas de código
+
+- Usar código limpio, nombres, funciones, variables, etc. en inglés.

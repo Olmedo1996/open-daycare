@@ -1,81 +1,58 @@
-@import "tailwindcss";
+@import 'tailwindcss';
+
+@theme {
+  --color-canvas: #f6ecdf;
+  --color-ink: #3f362e;
+  --color-card: #fffdf9;
+  --color-line: #ece0d0;
+  --color-accent: #d9583c;
+  --color-accent-soft: #f2937a;
+  --color-accent-warm: #ee8164;
+  --color-staff: #2e89a6;
+  --color-staff-deep: #1f7a93;
+  --color-achievement: #3e9b6c;
+  --color-announcement: #4e72c8;
+  --color-muted: #a89a8b;
+  --color-soft: #fbe3d8;
+  --color-allergy-warm: #fbd8cc;
+  --color-allergy-pink: #f9d2de;
+  --color-parent-active: #cfebd8;
+  --color-parent-pending: #f7e7a6;
+  --color-canvas-warm: #fbf4ec;
+  --color-accent-start: #f6a98e;
+  --color-accent-end: #ec7e62;
+  --color-btn-gradient: #f4977e;
+  --color-link: #c5503a;
+  --color-text-muted: #94887b;
+  --color-text-secondary: #6e6359;
+  --color-input-border: #eadfd0;
+  --color-placeholder: #b6a99b;
+  --color-logo-gradient: #f8c3a8;
+  --color-avatar-blue: #a9d9e8;
+  --color-checkbox-green: #5fb97e;
+  --color-checkbox-text: #8a7234;
+  --color-checkbox-bg: #fbf1d6;
+  --color-newpost-meal: #9a7b1e;
+  --color-newpost-nap-bg: #e7dcf6;
+  --color-newpost-nap-text: #7b5fc0;
+  --color-newpost-mood-text: #c56486;
+  --color-newpost-photo-text: #d9684a;
+  --color-newpost-announcement-bg: #ccd8f4;
+}
 
 @theme inline {
-  --font-sans: var(--font-nunito);
-  --font-display: var(--font-fredoka);
-
-  --color-cream: #f6ecdf;
-  --color-surface: #fffdf9;
-  --color-line: #ece0d0;
-  --color-line-soft: #f0e6d8;
-  --color-divider: #e7dac8;
-  --color-dash: #dbcdba;
-  --color-photo-bg: #f4ece1;
-
-  --color-ink: #3f362e;
-  --color-ink-soft: #4a4038;
-  --color-muted: #94887b;
-  --color-muted-deep: #6e6359;
-  --color-muted-light: #a89a8b;
-  --color-faint: #8a7c6d;
-  --color-photo-icon: #b0a290;
-
-  --color-brand: #ee8164;
-  --color-brand-mid: #f2937a;
-  --color-brand-light: #f4977e;
-  --color-brand-soft: #f8c3a8;
-  --color-accent: #d9583c;
-  --color-accent-deep: #c5503a;
-  --color-active-bg: #fbe3d8;
-  --color-like: #e0654a;
-
-  --color-success-bg: #cfebd8;
-  --color-success: #3e9b6c;
-  --color-info-bg: #c7e7f1;
-  --color-info: #2e89a6;
-  --color-warn-bg: #ccd8f4;
-  --color-warn: #4e72c8;
-  --color-kid-bg: #a9d9e8;
-  --color-kid: #1f7a93;
-
-  --color-rose-bg: #f4b8cc;
-  --color-rose: #c44a7a;
-  --color-mint-bg: #b9dec4;
-  --color-mint: #3e8b62;
-  --color-gold-bg: #f4dc8e;
-  --color-gold: #9a7b1e;
-  --color-violet-bg: #c9b6e8;
-  --color-violet: #7b5fc0;
-  --color-steel-bg: #a9c7e8;
-
-  --color-peanut-bg: #fbd8cc;
-  --color-peanut: #d9684a;
-  --color-vincular-bg: #f9d2de;
-  --color-vincular: #c56486;
-  --color-pending-bg: #f7e7a6;
-  --color-pending: #9a7b1e;
-
-  --color-alert-bg: #fbdad6;
-  --color-alert-icon: #f4a8a0;
-  --color-alert-title: #c5413a;
-  --color-alert-text: #b25249;
-  --color-kid-hover: #f2a78e;
+  --font-head: var(--font-fredoka);
+  --font-body: var(--font-nunito);
 }
 
 body {
-  background: var(--color-cream);
+  background: var(--color-canvas);
   color: var(--color-ink);
   font-family: var(--font-nunito), system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
 }
 
-::-webkit-scrollbar {
-  width: 10px;
-}
-
-::-webkit-scrollbar-thumb {
-  background: #e4d6c4;
-  border-radius: 8px;
-  border: 3px solid transparent;
-  background-clip: content-box;
+/* Kid card hover effect */
+.kid-card-hover:hover {
+  transform: translateY(-2px);
 }

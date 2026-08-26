@@ -29,16 +29,24 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 - Playwright: screenshots and any Playwright output go in `.playwright-mcp/` (gitignored).
 - Context7: use it to fetch current framework docs instead of relying on training data.
+- Supabase: backend (Postgres, Auth, Storage, Edge Functions, Realtime). Usa las herramientas MCP (`list_tables`, `apply_migration`, `execute_sql`, `get_advisors`, `query_logs`) para cambios de schema, debugging y queries. Antes de tocar el schema, ejecuta `list_tables` para entender la estructura existente. Prefiere desarrollo local con la CLI antes de aplicar cambios al proyecto remoto.
 
 ## Agents
 
 - `spec-verifier`: Verifies acceptance criteria of a spec file. Reviews implementation against each criterion, fixes code/spec issues found, and marks checkboxes. Uses Playwright MCP with vision to compare screenshots against references, and Context7 MCP to validate Next.js best practices.
 
-## Spec Driven Development - Skills
+## Skills
+
+### Spec Driven Development
 
 - /spec Usaremos esta habilidad para crear las especificaciones.
 - /spec-impl Usaremos esta skill para hacer las implementaciones.
 - /verify-spec Usaremos este comando para verificar los criterios de aceptación de una spec.
+
+### Supabase
+
+- `supabase`: Úsala para CUALQUIER tarea que involucre Supabase — productos (Database, Auth, Edge Functions, Realtime, Storage, Vectors, Cron, Queues), integraciones cliente/SSR (`supabase-js`, `@supabase/ssr`) en Next.js/React, problemas de auth (login, logout, sesiones, JWT, cookies, RLS), CLI o MCP server, cambios de schema, migraciones, extensiones Postgres y debugging de errores.
+- `supabase-postgres-best-practices`: Cárgala ANTES de escribir o cambiar cualquier cosa que viva en Postgres — crear/alterar tablas y columnas (incluido elegir tipos), diseño de schema, migraciones y declarative schemas, políticas RLS y sus tests, índices, triggers, funciones, queues y jobs programados (pg_cron, pgmq), vector search (pgvector), restaurar dumps. También para diagnosticar queries lentas, CPU alta, timeouts, EXPLAIN plans, conexión, locking, bloat o filas visibles para el usuario/tentant equivocado.
 
 ## Reglas de código
 

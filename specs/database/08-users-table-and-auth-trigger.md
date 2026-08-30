@@ -14,7 +14,7 @@
   - Enum type `user_status` (`pending`, `active`).
   - Tabla `public.users` (id uuid PK FK → `auth.users` ON DELETE CASCADE, daycare_id FK → `daycares`, role, status default `active`, full_name, avatar_url nullable, notify_on_post default true, daily_summary_enabled default true, created_at, updated_at).
   - Trigger `AFTER INSERT` en `auth.users` (función `SECURITY DEFINER`) que inserta en `public.users` leyendo `daycare_id`, `role` y `full_name` de `raw_user_meta_data`.
-  - RLS habilitada con dos políticas SELECT: propia fila (`auth.uid() = id`) y por daycare (mismo `daycare_id` para staff/admin).
+  - RLS habilitada con dos políticas SELECT: propia fila (`auth.uid() = id`) y por daycare (mismo `daycare_id` para staff/admin), usando un helper `SECURITY DEFINER` `get_my_daycare_id()` para evitar la recursión de RLS.
 - Actualizar `supabase/seed.sql` con un usuario staff de prueba:
   - INSERT en `auth.users` con `encrypted_password` (usando `crypt()` de `pgcrypto`) + meta_data con `daycare_id`, `role = 'staff'`, `full_name`.
   - La fila en `public.users` se crea automáticamente vía el trigger (no se inserta a mano).
@@ -90,9 +90,22 @@ CREATE TRIGGER on_auth_user_created
   FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
 ```
 
-### Políticas RLS
+### Helper para RLS + políticas
 
 ```sql
+-- Helper SECURITY DEFINER: devuelve el daycare_id del usuario autenticado.
+-- Evita la recursión infinita de RLS: un subselect directo sobre public.users
+-- dentro de la política provocaría 'infinite recursion detected in policy'.
+CREATE OR REPLACE FUNCTION public.get_my_daycare_id()
+RETURNS uuid
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT daycare_id FROM public.users WHERE id = auth.uid()
+$$;
+
 -- Un usuario ve su propia fila
 CREATE POLICY "users_select_self"
   ON public.users
@@ -107,9 +120,7 @@ CREATE POLICY "users_select_same_daycare_staff"
   TO authenticated
   USING (
     role IN ('staff', 'admin')
-    AND daycare_id = (
-      SELECT daycare_id FROM public.users WHERE id = auth.uid()
-    )
+    AND daycare_id = public.get_my_daycare_id()
   );
 ```
 
@@ -182,6 +193,7 @@ INSERT INTO auth.users (
 - [ ] RLS está habilitada en `users`.
 - [ ] Existe la política `users_select_self` (SELECT donde `auth.uid() = id`).
 - [ ] Existe la política `users_select_same_daycare_staff` (SELECT para staff/admin del mismo daycare).
+- [ ] La función helper `get_my_daycare_id()` existe como `SECURITY DEFINER` y es usada por `users_select_same_daycare_staff` (evita recursión de RLS).
 - [ ] `supabase/seed.sql` contiene el INSERT del usuario staff en `auth.users`.
 - [ ] El usuario `staff@opendaycare.test` existe en `auth.users` del remoto.
 - [ ] La fila correspondiente existe en `public.users` con `role = 'staff'` y `full_name = 'Sofía Staff'` (creada por el trigger).
@@ -198,6 +210,7 @@ INSERT INTO auth.users (
 - **Sí:** `COALESCE` con defaults (`role = 'parent'`, `full_name = ''`) en el trigger. Evita errores si el signup no incluye meta_data completa.
 - **Sí:** Función `SECURITY DEFINER` con `search_path = public`. Necesario porque el trigger corre sobre `auth.users` (schema interno) y debe insertar en `public.users`.
 - **Sí:** Dos políticas SELECT (propia fila + por daycare para staff). Permite que el staff vea a su equipo y los padres vean solo su propio perfil.
+- **Sí:** Helper `get_my_daycare_id()` (`SECURITY DEFINER`, `STABLE`, `search_path = public`) usado por `users_select_same_daycare_staff` en lugar de un subselect directo sobre `public.users`. Un subselect sobre la misma tabla dentro de una política provoca `infinite recursion detected in policy for relation "users"` en runtime; el helper lo evita (patrón recomendado por Supabase).
 - **Sí:** Seed directo en `auth.users` con `pgcrypto` para el usuario staff. Reproducible, no depende del dashboard, y el trigger prueba que funciona end-to-end.
 - **Sí:** `instance_id` fijo en el seed. Necesario para inserts directos en `auth.users` en entornos de seed; en producción Supabase lo gestiona.
 - **Sí:** Regenerar tipos TypeScript en esta spec. Mantiene `types/database.types.ts` sincronizado con el schema real.

@@ -20,6 +20,19 @@ COMMENT ON TABLE public.users IS 'Perfil de aplicación vinculado a Supabase Aut
 
 ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
 
+-- Helper SECURITY DEFINER: devuelve el daycare_id del usuario autenticado.
+-- Evita la recursión infinita de RLS: un subselect directo sobre public.users
+-- dentro de la política provocaría 'infinite recursion detected in policy'.
+CREATE OR REPLACE FUNCTION public.get_my_daycare_id()
+RETURNS uuid
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT daycare_id FROM public.users WHERE id = auth.uid()
+$$;
+
 -- Un usuario ve su propia fila
 CREATE POLICY "users_select_self"
   ON public.users
@@ -34,9 +47,7 @@ CREATE POLICY "users_select_same_daycare_staff"
   TO authenticated
   USING (
     role IN ('staff', 'admin')
-    AND daycare_id = (
-      SELECT daycare_id FROM public.users WHERE id = auth.uid()
-    )
+    AND daycare_id = public.get_my_daycare_id()
   );
 
 -- Función SECURITY DEFINER que crea el perfil

@@ -19,6 +19,16 @@ This version has breaking changes — APIs, conventions, and file structure may 
 - Path alias `@/*` maps to the repo root (`./*`), not `src/`.
 - Tailwind CSS v4: configured inline via `@import "tailwindcss"` + `@theme` in `app/globals.css` and the `@tailwindcss/postcss` plugin. There is **no** `tailwind.config.ts`; do not create one.
 
+## Supabase en la aplicación (cliente)
+
+- La app interactúa con la base de datos mediante los paquetes oficiales de Supabase para Next.js: `@supabase/ssr` y `@supabase/supabase-js`. No uses `fetch` directo a la REST API ni clientes ad-hoc — siempre los helpers existentes.
+- Helpers de cliente (ya creados, en `lib/supabase/`):
+  - `lib/supabase/server.ts` → `createClient()` para Server Components, Server Actions y Route Handlers (usa `cookies()` de `next/headers`).
+  - `lib/supabase/client.ts` → `createClient()` para Client Components (usa `createBrowserClient`).
+  - `lib/supabase/proxy.ts` → `updateSession()` para refrescar sesiones; lo consume el `proxy.ts` de la raíz.
+- Next.js 16 deprecó `middleware.ts` en favor de `proxy.ts` (función exportada `proxy`). El refresh de sesiones vive en `proxy.ts` (raíz) → `updateSession()`, que llama `supabase.auth.getClaims()`. No pongas lógica entre `createServerClient` y `getClaims()`.
+- Credenciales: variables de entorno `NEXT_PUBLIC_SUPABASE_URL` y `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (clave publishable, no la `anon` legacy). Nunca uses la `service_role`/secret key en código de cliente.
+
 ## Project context
 
 - `open-daycare`: a Spanish-language daycare management app (staff + family/parent flows). UI copy is in Spanish.

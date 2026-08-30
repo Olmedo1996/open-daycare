@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { getActiveNav, sidebarUser } from '@/app/_data/mock';
+import { signOutAction } from '@/lib/actions/auth';
 import {
   BellIcon,
   HomeIcon,
@@ -89,14 +90,16 @@ export function SidebarContent({
               {sidebarUser.role}
             </span>
           </span>
-          <Link
-            href="#"
-            title="Cerrar sesión"
-            aria-label="Cerrar sesión"
-            className="shrink-0 w-8 h-8 rounded-[10px] bg-canvas text-[#94887B] flex items-center justify-center"
-          >
-            <LogoutIcon className="w-4 h-4" />
-          </Link>
+          <form action={signOutAction}>
+            <button
+              type="submit"
+              title="Cerrar sesión"
+              aria-label="Cerrar sesión"
+              className="shrink-0 w-8 h-8 rounded-[10px] bg-canvas text-[#94887B] flex items-center justify-center"
+            >
+              <LogoutIcon className="w-4 h-4" />
+            </button>
+          </form>
         </div>
       </div>
     </>

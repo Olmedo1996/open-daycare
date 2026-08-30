@@ -1,6 +1,6 @@
 # SPEC 07 — Tabla daycares + setup de Supabase (CLI, migraciones, cliente JS y tipos)
 
-> **Estado:** aprobado
+> **Estado:** implementado
 > **Depende de:** ninguna (primera spec de backend/BD)
 > **Fecha:** 2026-08-29
 > **Objetivo:** Crear la tabla `daycares` en Supabase con RLS habilitada y política de solo lectura para autenticados, inicializar la infraestructura local de migraciones (`supabase/`), instalar `@supabase/ssr`, crear los clientes browser/server y generar los tipos TypeScript.

@@ -42,6 +42,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 - /spec Usaremos esta habilidad para crear las especificaciones.
 - /spec-impl Usaremos esta skill para hacer las implementaciones.
 - /verify-spec Usaremos este comando para verificar los criterios de aceptación de una spec.
+- Cualquier spec relacionada con la base de datos debe guardarse en la carpeta `spec/database/`.
 
 ### Supabase
 

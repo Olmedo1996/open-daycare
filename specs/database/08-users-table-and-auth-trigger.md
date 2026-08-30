@@ -201,23 +201,23 @@ INSERT INTO auth.users (
 
 ## Acceptance criteria
 
-- [ ] Existe un archivo de migración `create_users_table` con el SQL de enums, tabla, trigger y políticas.
-- [ ] Los enum types `user_role` (`staff`, `parent`, `admin`) y `user_status` (`pending`, `active`) existen en el remoto.
-- [ ] La tabla `public.users` existe con columnas: `id` (uuid PK FK → auth.users), `daycare_id` (FK → daycares), `role` (user_role), `status` (user_status default 'active'), `full_name`, `avatar_url` (nullable), `notify_on_post` (default true), `daily_summary_enabled` (default true), `created_at`, `updated_at`.
-- [ ] La función `handle_new_user()` existe como `SECURITY DEFINER`.
-- [ ] El trigger `on_auth_user_created` existe sobre `auth.users` (AFTER INSERT).
-- [ ] RLS está habilitada en `users`.
-- [ ] Existe la política `users_select_self` (SELECT donde `auth.uid() = id`).
-- [ ] Existe la política `users_select_same_daycare_staff` (SELECT para staff/admin del mismo daycare).
-- [ ] La función helper `get_my_daycare_id()` existe como `SECURITY DEFINER` y es usada por `users_select_same_daycare_staff` (evita recursión de RLS).
-- [ ] `supabase/seed.sql` contiene el INSERT del usuario staff en `auth.users`.
-- [ ] El usuario `staff@opendaycare.test` existe en `auth.users` del remoto.
-- [ ] La fila correspondiente existe en `public.users` con `role = 'staff'` y `full_name = 'Sofía Staff'` (creada por el trigger).
-- [ ] El login con `staff@opendaycare.test` / `staff12345` devuelve una sesión válida.
-- [ ] `types/database.types.ts` contiene la interfaz `Database` con la tabla `users` y los enums `user_role` / `user_status`.
-- [ ] `npm run lint` pasa sin errores.
-- [ ] `npx tsc --noEmit` pasa sin errores.
-- [ ] `get_advisors` no reporta advisors críticos relacionados con `users` o el trigger.
+- [x] Existe un archivo de migración `create_users_table` con el SQL de enums, tabla, trigger y políticas.
+- [x] Los enum types `user_role` (`staff`, `parent`, `admin`) y `user_status` (`pending`, `active`) existen en el remoto.
+- [x] La tabla `public.users` existe con columnas: `id` (uuid PK FK → auth.users), `daycare_id` (FK → daycares), `role` (user_role), `status` (user_status default 'active'), `full_name`, `avatar_url` (nullable), `notify_on_post` (default true), `daily_summary_enabled` (default true), `created_at`, `updated_at`.
+- [x] La función `handle_new_user()` existe como `SECURITY DEFINER`.
+- [x] El trigger `on_auth_user_created` existe sobre `auth.users` (AFTER INSERT).
+- [x] RLS está habilitada en `users`.
+- [x] Existe la política `users_select_self` (SELECT donde `auth.uid() = id`).
+- [x] Existe la política `users_select_same_daycare_staff` (SELECT para staff/admin del mismo daycare).
+- [x] La función helper `get_my_daycare_id()` existe como `SECURITY DEFINER` y es usada por `users_select_same_daycare_staff` (evita recursión de RLS).
+- [x] `supabase/seed.sql` contiene el INSERT del usuario staff en `auth.users`.
+- [x] El usuario `staff@opendaycare.test` existe en `auth.users` del remoto.
+- [x] La fila correspondiente existe en `public.users` con `role = 'staff'` y `full_name = 'Sofía Staff'` (creada por el trigger).
+- [x] El login con `staff@opendaycare.test` / `staff12345` devuelve una sesión válida.
+- [x] `types/database.types.ts` contiene la interfaz `Database` con la tabla `users` y los enums `user_role` / `user_status`.
+- [x] `npm run lint` pasa sin errores.
+- [x] `npx tsc --noEmit` pasa sin errores.
+- [x] `get_advisors` no reporta advisors críticos relacionados con `users` o el trigger.
 
 ## Decisions
 

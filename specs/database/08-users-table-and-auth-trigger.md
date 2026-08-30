@@ -1,6 +1,6 @@
 # SPEC 08 — Tabla `users` + enums + trigger de Auth y usuario staff de prueba
 
-> **Estado:** Aprobado
+> **Estado:** Implementado
 > **Depende de:** SPEC 07 (tabla `daycares`, setup de Supabase y clientes JS)
 > **Fecha:** 2026-08-29
 > **Objetivo:** Crear la tabla `users` con sus enums `user_role` y `user_status`, un trigger `AFTER INSERT` sobre `auth.users` que genere automáticamente el perfil, políticas RLS de lectura y un usuario staff seedeable para probar la app.

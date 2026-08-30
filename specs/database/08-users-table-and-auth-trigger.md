@@ -129,7 +129,10 @@ CREATE POLICY "users_select_same_daycare_staff"
 ```sql
 -- supabase/seed.sql (añadir al existente que ya tiene el daycare)
 
--- Insertar directamente en auth.users con pgcrypto
+-- Insertar directamente en auth.users con pgcrypto.
+-- Las columnas string van a '' (y is_super_admin a false) porque GoTrue las
+-- escanea como no-nulas al hacer login; si quedan NULL, el signin falla con
+-- 500 'Database error querying schema'.
 INSERT INTO auth.users (
   id,
   instance_id,
@@ -138,11 +141,20 @@ INSERT INTO auth.users (
   email,
   email_confirmed_at,
   encrypted_password,
+  email_change,
+  email_change_token_new,
+  email_change_token_current,
+  phone,
+  phone_change,
+  phone_change_token,
+  recovery_token,
+  reauthentication_token,
+  confirmation_token,
+  is_super_admin,
   raw_app_meta_data,
   raw_user_meta_data,
   created_at,
-  updated_at,
-  confirmation_token
+  updated_at
 ) VALUES (
   gen_random_uuid(),
   '00000000-0000-0000-0000-000000000000',
@@ -151,6 +163,11 @@ INSERT INTO auth.users (
   'staff@opendaycare.test',
   now(),
   crypt('staff12345', gen_salt('bf')),
+  '', '', '',
+  '', '', '',
+  '', '',
+  '',
+  false,
   '{}'::jsonb,
   jsonb_build_object(
     'daycare_id', (SELECT id FROM public.daycares WHERE name = 'Guardería Sala Soles'),
@@ -158,8 +175,7 @@ INSERT INTO auth.users (
     'full_name', 'Sofía Staff'
   ),
   now(),
-  now(),
-  ''
+  now()
 );
 
 -- La fila en public.users se crea automáticamente vía el trigger on_auth_user_created.
@@ -213,6 +229,7 @@ INSERT INTO auth.users (
 - **Sí:** Helper `get_my_daycare_id()` (`SECURITY DEFINER`, `STABLE`, `search_path = public`) usado por `users_select_same_daycare_staff` en lugar de un subselect directo sobre `public.users`. Un subselect sobre la misma tabla dentro de una política provoca `infinite recursion detected in policy for relation "users"` en runtime; el helper lo evita (patrón recomendado por Supabase).
 - **Sí:** Seed directo en `auth.users` con `pgcrypto` para el usuario staff. Reproducible, no depende del dashboard, y el trigger prueba que funciona end-to-end.
 - **Sí:** `instance_id` fijo en el seed. Necesario para inserts directos en `auth.users` en entornos de seed; en producción Supabase lo gestiona.
+- **Sí:** Setear a `''` las columnas string de `auth.users` en el seed (`email_change`, `email_change_token_new/current`, `phone`, `phone_change`, `phone_change_token`, `recovery_token`, `reauthentication_token`) y `is_super_admin = false`. GoTrue las escanea como strings no-nulas al hacer login; con NULL el signin falla con `500 Database error querying schema` (verificado en logs de auth: `sql: Scan error ... converting NULL to string is unsupported`).
 - **Sí:** Regenerar tipos TypeScript en esta spec. Mantiene `types/database.types.ts` sincronizado con el schema real.
 - **No:** Políticas INSERT/UPDATE/DELETE en `users`. El INSERT lo maneja el trigger; los demás van con specs de admin/gestión de usuarios.
 - **No:** Trigger de `updated_at`. Va en otra spec cuando se implemente edición de perfiles.

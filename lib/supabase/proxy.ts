@@ -40,7 +40,32 @@ export async function updateSession(request: NextRequest) {
 
   // IMPORTANT: If you remove getClaims() and you use server-side rendering
   // with the Supabase client, your users may be randomly logged out.
-  await supabase.auth.getClaims();
+  const { data } = await supabase.auth.getClaims();
+  const isAuthenticated = data?.claims != null;
+
+  const PUBLIC_PATHS = ['/login', '/activate'];
+  const isPublicRoute = PUBLIC_PATHS.includes(request.nextUrl.pathname);
+
+  let redirectPath: string | null = null;
+  if (!isAuthenticated && !isPublicRoute) {
+    redirectPath = '/login';
+  } else if (isAuthenticated && isPublicRoute) {
+    redirectPath = '/';
+  }
+
+  if (redirectPath) {
+    const redirectUrl = request.nextUrl.clone();
+    redirectUrl.pathname = redirectPath;
+    redirectUrl.search = '';
+
+    const redirectResponse = NextResponse.redirect(redirectUrl, 307);
+    // Preserve any cookies (e.g. rotated auth tokens) set by getClaims().
+    for (const { name, value, ...options } of supabaseResponse.cookies.getAll()) {
+      redirectResponse.cookies.set(name, value, options);
+    }
+
+    return redirectResponse;
+  }
 
   // IMPORTANT: You *must* return the supabaseResponse object as it is. If you're
   // creating a new response object with NextResponse.next() make sure to:

@@ -1,5 +1,7 @@
 import Link from 'next/link';
 
+import { LoginForm } from './login-form';
+
 export default function LoginPage() {
   return (
     <div className="min-h-screen grid grid-cols-1 lg:grid-cols-[1.05fr_1fr] bg-[#FBF4EC]">
@@ -40,33 +42,7 @@ export default function LoginPage() {
           <h2 className="font-head font-semibold text-3xl mb-1 text-[#3F362E]">Iniciar sesión</h2>
           <p className="mb-7 text-[#94887B] text-sm">Ingresá para ver el día de hoy.</p>
 
-          {/* Email */}
-          <div className="text-xs font-bold tracking-wider text-[#94887B] mb-2">EMAIL</div>
-          <input
-            type="email"
-            defaultValue="caro@opendaycare.com"
-            className="w-full p-3.5 px-4 rounded-[14px] border-[1.5px] border-[#EADFD0] bg-white text-base text-[#3F362E] mb-4 placeholder:text-[#B6A99B]"
-          />
-
-          {/* Password */}
-          <div className="text-xs font-bold tracking-wider text-[#94887B] mb-2">CONTRASEÑA</div>
-          <input
-            type="password"
-            placeholder="••••••••"
-            className="w-full p-3.5 px-4 rounded-[14px] border-[1.5px] border-[#EADFD0] bg-white text-base text-[#3F362E] mb-2.5 placeholder:text-[#B6A99B]"
-          />
-
-          {/* Forgot password */}
-          <div className="text-right mb-5">
-            <span className="text-[#C5503A] text-[13.5px] font-bold cursor-default">¿Olvidaste tu contraseña?</span>
-          </div>
-
-          {/* Login button */}
-          <div
-            className="block text-center w-full p-4 rounded-[15px] bg-linear-to-b from-[#F4977E] to-[#EE8164] text-white font-extrabold text-base cursor-default shadow-[0_10px_22px_-8px_rgba(238,129,100,0.7)]"
-          >
-            Iniciar sesión
-          </div>
+          <LoginForm />
 
           {/* Footer link */}
           <p className="text-center mt-6 text-[#94887B] text-[14.5px]">

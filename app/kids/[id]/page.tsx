@@ -60,5 +60,10 @@ export default async function KidProfilePage({ params }: KidProfilePageProps) {
     roomName = room?.name ?? null;
   }
 
-  return <KidProfile kid={kid} roomName={roomName} />;
+  const { data: rooms } = await supabase
+    .from('rooms')
+    .select('*')
+    .order('name');
+
+  return <KidProfile kid={kid} roomName={roomName} rooms={rooms ?? []} />;
 }

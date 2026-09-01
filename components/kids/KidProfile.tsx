@@ -2,17 +2,22 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import type { Database } from '@/types/database.types';
 import { Sidebar } from '@/components/shared/Sidebar';
 import { MobileNav } from '@/components/shared/MobileNav';
 import { ChevronLeftIcon, AlertTriangleIcon, EditIcon } from '@/components/shared/icons';
 import { LinkParentModal } from '@/components/kids/LinkParentModal';
+import { AddKidModal } from '@/components/kids/AddKidModal';
+import { deleteChild } from '@/app/kids/actions';
 
 type Child = Database['public']['Tables']['children']['Row'];
+type Room = Database['public']['Tables']['rooms']['Row'];
 
 interface KidProfileProps {
   kid: Child;
   roomName: string | null;
+  rooms: Room[];
 }
 
 function calculateAge(birthDate: string): number {
@@ -48,12 +53,22 @@ function getAvatarColor(id: string) {
   return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
 }
 
-export function KidProfile({ kid, roomName }: KidProfileProps) {
+export function KidProfile({ kid, roomName, rooms }: KidProfileProps) {
+  const router = useRouter();
   const [showLinkParent, setShowLinkParent] = useState(false);
+  const [editingKid, setEditingKid] = useState(false);
   const hasAllergies = kid.allergy_tags.length > 0;
   const avatar = getAvatarColor(kid.id);
   const initial = kid.full_name.charAt(0).toUpperCase();
   const age = calculateAge(kid.birth_date);
+
+  const handleDelete = async () => {
+    if (!confirm(`¿Eliminar a ${kid.full_name}? Esta acción no se puede deshacer.`)) {
+      return;
+    }
+    await deleteChild(kid.id);
+    router.push('/kids');
+  };
 
   return (
     <div className="flex flex-1 min-h-screen bg-canvas">
@@ -86,13 +101,14 @@ export function KidProfile({ kid, roomName }: KidProfileProps) {
                     {age} años · Sala {roomName ?? 'Sin sala'}
                   </p>
                 </div>
-                <a
-                  href="#"
-                  className="border border-[#ECE0D0] bg-card text-[#6E6359] font-bold text-[14px] px-4 py-[9px] rounded-[12px] flex items-center gap-2"
+                <button
+                  type="button"
+                  onClick={() => setEditingKid(true)}
+                  className="border border-[#ECE0D0] bg-card text-[#6E6359] font-bold text-[14px] px-4 py-[9px] rounded-[12px] flex items-center gap-2 cursor-pointer"
                 >
                   <EditIcon className="w-4 h-4" />
                   Editar
-                </a>
+                </button>
               </div>
 
               {hasAllergies && (
@@ -189,6 +205,26 @@ export function KidProfile({ kid, roomName }: KidProfileProps) {
                   </button>
                 </div>
               </div>
+
+              <button
+                type="button"
+                onClick={handleDelete}
+                className="flex items-center justify-center gap-[9px] w-full px-[13px] py-[13px] rounded-[14px] border border-[#E5D5C5] bg-white text-[#8A7C6D] font-extrabold text-[15px] cursor-pointer hover:bg-[#FDF6EF] transition-colors"
+              >
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" />
+                </svg>
+                Eliminar
+              </button>
             </div>
           </div>
         </div>
@@ -198,6 +234,12 @@ export function KidProfile({ kid, roomName }: KidProfileProps) {
         kidName={kid.full_name}
         onClose={() => setShowLinkParent(false)}
         onLink={() => {}}
+      />
+      <AddKidModal
+        open={editingKid}
+        onClose={() => setEditingKid(false)}
+        rooms={rooms}
+        child={kid}
       />
     </div>
   );

@@ -1,26 +1,70 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import type { Database } from '@/types/database.types';
+import { useRouter } from 'next/navigation';
+import { createChild, updateChild } from '@/app/kids/actions';
 
 type Room = Database['public']['Tables']['rooms']['Row'];
+type Child = Database['public']['Tables']['children']['Row'];
 
 interface AddKidModalProps {
   open: boolean;
   onClose: () => void;
   rooms: Room[];
+  child?: Child;
 }
 
-export function AddKidModal({ open, onClose, rooms }: AddKidModalProps) {
-  const [fullName, setFullName] = useState('');
-  const [birthDate, setBirthDate] = useState('');
-  const [room, setRoom] = useState('');
-  const [allergies, setAllergies] = useState('');
-  const [medicalNotes, setMedicalNotes] = useState('');
+function getChildDefaults(child: Child) {
+  const parts = child.birth_date.split('-');
+  return {
+    fullName: child.full_name,
+    birthDate: `${parts[2]}/${parts[1]}/${parts[0]}`,
+    roomId: child.room_id ?? '',
+    allergies: child.allergy_tags.join(', '),
+    medicalNotes: child.medical_notes,
+  };
+}
+
+const emptyDefaults = {
+  fullName: '',
+  birthDate: '',
+  roomId: '',
+  allergies: '',
+  medicalNotes: '',
+};
+
+export function AddKidModal({ open, onClose, rooms, child }: AddKidModalProps) {
+  const router = useRouter();
+  const isEditing = !!child;
+  const prevOpenRef = useRef(false);
+
+  const defaults = open && child ? getChildDefaults(child) : emptyDefaults;
+
+  const [fullName, setFullName] = useState(defaults.fullName);
+  const [birthDate, setBirthDate] = useState(defaults.birthDate);
+  const [roomId, setRoomId] = useState(defaults.roomId);
+  const [allergies, setAllergies] = useState(defaults.allergies);
+  const [medicalNotes, setMedicalNotes] = useState(defaults.medicalNotes);
+  const [isSaving, setIsSaving] = useState(false);
 
   const [nameError, setNameError] = useState('');
   const [dateError, setDateError] = useState('');
   const [roomError, setRoomError] = useState('');
+
+  useEffect(() => {
+    if (open && !prevOpenRef.current) {
+      setFullName(defaults.fullName);
+      setBirthDate(defaults.birthDate);
+      setRoomId(defaults.roomId);
+      setAllergies(defaults.allergies);
+      setMedicalNotes(defaults.medicalNotes);
+      setNameError('');
+      setDateError('');
+      setRoomError('');
+    }
+    prevOpenRef.current = open;
+  }, [open, defaults]);
 
   const handleDateChange = (value: string) => {
     const digits = value.replace(/\D/g, '').slice(0, 8);
@@ -32,7 +76,7 @@ export function AddKidModal({ open, onClose, rooms }: AddKidModalProps) {
     setBirthDate(formatted);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     let valid = true;
     setNameError('');
     setDateError('');
@@ -48,41 +92,59 @@ export function AddKidModal({ open, onClose, rooms }: AddKidModalProps) {
       valid = false;
     }
 
-    if (!room) {
+    if (!roomId) {
       setRoomError('Debes seleccionar una sala');
       valid = false;
     }
 
     if (!valid) return;
 
-    resetForm();
-    onClose();
-  };
+    const [dd, mm, yyyy] = birthDate.split('/');
+    const isoDate = `${yyyy}-${mm}-${dd}`;
 
-  const resetForm = () => {
-    setFullName('');
-    setBirthDate('');
-    setRoom('');
-    setAllergies('');
-    setMedicalNotes('');
-    setNameError('');
-    setDateError('');
-    setRoomError('');
+    const allergyArray = allergies
+      .split(',')
+      .map((a) => a.trim().toLowerCase())
+      .filter((a) => a.length > 0);
+
+    setIsSaving(true);
+    try {
+      const payload = {
+        full_name: fullName.trim(),
+        birth_date: isoDate,
+        room_id: roomId,
+        allergy_tags: allergyArray,
+        medical_notes: medicalNotes.trim(),
+      };
+
+      if (isEditing) {
+        await updateChild(child.id, payload);
+      } else {
+        await createChild(payload);
+      }
+
+      router.refresh();
+      onClose();
+    } catch {
+      setNameError('Error al guardar. Intenta de nuevo.');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleBackdropClick = (e: React.MouseEvent) => {
-    if (e.target === e.currentTarget) {
+    if (e.target === e.currentTarget && !isSaving) {
       onClose();
     }
   };
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
+      if (e.key === 'Escape' && !isSaving) {
         onClose();
       }
     },
-    [onClose],
+    [onClose, isSaving],
   );
 
   useEffect(() => {
@@ -109,19 +171,21 @@ export function AddKidModal({ open, onClose, rooms }: AddKidModalProps) {
           <button
             type="button"
             onClick={onClose}
-            className="text-[15px] font-bold text-[#94887B] hover:text-[#7A6E64]"
+            disabled={isSaving}
+            className="text-[15px] font-bold text-[#94887B] hover:text-[#7A6E64] disabled:opacity-50"
           >
             Cancelar
           </button>
           <span className="font-fredoka text-[18px] font-semibold text-[#3F362E]">
-            Agregar ni&ntilde;o
+            {isEditing ? 'Editar ni&ntilde;o' : 'Agregar ni&ntilde;o'}
           </span>
           <button
             type="button"
             onClick={handleSave}
-            className="text-[15px] font-extrabold text-[#D9583C] hover:text-[#C44A2E]"
+            disabled={isSaving}
+            className="text-[15px] font-extrabold text-[#D9583C] hover:text-[#C44A2E] disabled:opacity-50"
           >
-            Guardar
+            {isSaving ? 'Guardando...' : 'Guardar'}
           </button>
         </div>
 
@@ -134,7 +198,8 @@ export function AddKidModal({ open, onClose, rooms }: AddKidModalProps) {
             placeholder="Ej. Martina L&oacute;pez"
             value={fullName}
             onChange={(e) => setFullName(e.target.value)}
-            className="mb-1 w-full rounded-[14px] border-[1.5px] border-[#EADFD0] bg-white px-4 py-3 text-[15px] text-[#3F362E] placeholder:text-[#B6A99B]"
+            disabled={isSaving}
+            className="mb-1 w-full rounded-[14px] border-[1.5px] border-[#EADFD0] bg-white px-4 py-3 text-[15px] text-[#3F362E] placeholder:text-[#B6A99B] disabled:opacity-50"
           />
           {nameError && (
             <p className="mb-4 text-[13px] font-medium text-[#D9583C]">
@@ -153,7 +218,8 @@ export function AddKidModal({ open, onClose, rooms }: AddKidModalProps) {
                 value={birthDate}
                 onChange={(e) => handleDateChange(e.target.value)}
                 maxLength={10}
-                className="w-full rounded-[14px] border-[1.5px] border-[#EADFD0] bg-white px-4 py-3 text-[15px] text-[#3F362E] placeholder:text-[#B6A99B]"
+                disabled={isSaving}
+                className="w-full rounded-[14px] border-[1.5px] border-[#EADFD0] bg-white px-4 py-3 text-[15px] text-[#3F362E] placeholder:text-[#B6A99B] disabled:opacity-50"
               />
               {dateError && (
                 <p className="mt-1 text-[13px] font-medium text-[#D9583C]">
@@ -168,18 +234,19 @@ export function AddKidModal({ open, onClose, rooms }: AddKidModalProps) {
               </label>
               <div className="relative">
                 <select
-                  value={room}
+                  value={roomId}
                   onChange={(e) => {
-                    setRoom(e.target.value);
+                    setRoomId(e.target.value);
                     setRoomError('');
                   }}
-                  className="w-full appearance-none rounded-[14px] border-[1.5px] border-[#EADFD0] bg-white px-4 py-3 pr-10 text-[15px] font-bold text-[#3F362E]"
+                  disabled={isSaving}
+                  className="w-full appearance-none rounded-[14px] border-[1.5px] border-[#EADFD0] bg-white px-4 py-3 pr-10 text-[15px] font-bold text-[#3F362E] disabled:opacity-50"
                 >
                   <option value="" disabled>
                     Seleccionar sala
                   </option>
                   {rooms.map((r) => (
-                    <option key={r.id} value={r.name}>
+                    <option key={r.id} value={r.id}>
                       {r.name}
                     </option>
                   ))}
@@ -214,7 +281,8 @@ export function AddKidModal({ open, onClose, rooms }: AddKidModalProps) {
             placeholder="Ej. Man&iacute;, Lactosa"
             value={allergies}
             onChange={(e) => setAllergies(e.target.value)}
-            className="mb-1 w-full rounded-[14px] border-[1.5px] border-[#EADFD0] bg-white px-4 py-3 text-[15px] text-[#3F362E] placeholder:text-[#B6A99B]"
+            disabled={isSaving}
+            className="mb-1 w-full rounded-[14px] border-[1.5px] border-[#EADFD0] bg-white px-4 py-3 text-[15px] text-[#3F362E] placeholder:text-[#B6A99B] disabled:opacity-50"
           />
 
           <label className="mb-2 mt-4 block text-[12px] font-extrabold tracking-wide text-[#94887B]">
@@ -224,7 +292,8 @@ export function AddKidModal({ open, onClose, rooms }: AddKidModalProps) {
             placeholder="Indicaciones, medicaci&oacute;n, contactos&hellip;"
             value={medicalNotes}
             onChange={(e) => setMedicalNotes(e.target.value)}
-            className="w-full resize-y rounded-[14px] border-[1.5px] border-[#EADFD0] bg-white px-4 py-3 text-[15px] leading-relaxed text-[#3F362E] placeholder:text-[#B6A99B]"
+            disabled={isSaving}
+            className="w-full resize-y rounded-[14px] border-[1.5px] border-[#EADFD0] bg-white px-4 py-3 text-[15px] leading-relaxed text-[#3F362E] placeholder:text-[#B6A99B] disabled:opacity-50"
             style={{ minHeight: '90px' }}
           />
         </div>

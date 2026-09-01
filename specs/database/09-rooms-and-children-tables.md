@@ -1,6 +1,6 @@
 # SPEC 09 — Tablas `rooms` y `children` + enums + seed + migración UI de /kids
 
-> **Estado:** Aprobado
+> **Estado:** Implementado
 > **Depende de:** SPEC 07 (tabla `daycares`, setup de Supabase y clientes JS); SPEC 08 (tabla `users`, enums, trigger de Auth)
 > **Fecha:** 2026-08-31
 > **Objetivo:** Crear las tablas `rooms` y `children` con el enum `child_status`, seed de 3 salas por defecto y políticas RLS, y migrar la página `/kids` para que lea datos reales de Supabase en vez del mock `app/_data/kids.ts`.

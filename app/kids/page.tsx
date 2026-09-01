@@ -9,7 +9,7 @@ export default async function KidsPage() {
     .select('*')
     .order('name');
 
-  const { data: children } = await supabase
+  const { data: kidsData } = await supabase
     .from('children')
     .select('*')
     .order('full_name');
@@ -17,7 +17,7 @@ export default async function KidsPage() {
   return (
     <KidsList
       rooms={rooms ?? []}
-      children={children ?? []}
+      kidsData={kidsData ?? []}
     />
   );
 }

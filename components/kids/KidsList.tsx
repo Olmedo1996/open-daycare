@@ -13,14 +13,14 @@ type Child = Database['public']['Tables']['children']['Row'];
 
 interface KidsListProps {
   rooms: Room[];
-  children: Child[];
+  kidsData: Child[];
 }
 
 function normalize(str: string): string {
   return str.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 }
 
-export function KidsList({ rooms, children: kidsData }: KidsListProps) {
+export function KidsList({ rooms, kidsData }: KidsListProps) {
   const [query, setQuery] = useState('');
   const [showAddKid, setShowAddKid] = useState(false);
 

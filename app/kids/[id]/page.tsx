@@ -1,5 +1,4 @@
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { KidProfile } from '@/components/kids/KidProfile';
 import { Sidebar } from '@/components/shared/Sidebar';

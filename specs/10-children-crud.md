@@ -1,6 +1,6 @@
 # SPEC 10 — CRUD de niños: Server Actions + modal Crear/Editar + Eliminar
 
-> **Estado:** Aprobado
+> **Estado:** Implementado
 > **Depende de:** SPEC 09 (tablas `rooms` y `children`, migración UI de `/kids`)
 > **Fecha:** 2026-08-31
 > **Objetivo:** Implementar las operaciones CREATE, UPDATE y DELETE para la tabla `children` mediante Server Actions, reutilizando el modal `AddKidModal` en modo crear/editar y agregando eliminación desde el perfil.
@@ -102,19 +102,19 @@ export async function deleteChild(id: string) {
 
 ## Acceptance criteria
 
-- [ ] `app/kids/actions.ts` existe con `createChild`, `updateChild` y `deleteChild`.
-- [ ] `createChild` inserta un niño en Supabase y revalida `/kids`.
-- [ ] `updateChild` actualiza un niño existente y revalida `/kids` y `/kids/[id]`.
-- [ ] `deleteChild` elimina un niño y revalida `/kids`.
-- [ ] `AddKidModal` acepta prop `child?` y precarga el formulario en modo edición.
-- [ ] El dropdown de sala usa `room_id` (uuid) en vez de `name`.
-- [ ] `allergy_tags` se convierte de string libre a `text[]` (split por coma, trim, lowercase).
-- [ ] La fecha `dd/mm/aaaa` se convierte a ISO antes de enviar a Supabase.
-- [ ] El botón "Editar" en `KidProfile` abre el modal con los datos del niño.
-- [ ] El botón "Eliminar" en `KidProfile` muestra confirmación y ejecuta `deleteChild`.
-- [ ] Después de crear/editar/eliminar, la UI se actualiza sin recarga manual.
-- [ ] `npm run lint` pasa sin errores.
-- [ ] `npx tsc --noEmit` pasa sin errores.
+- [x] `app/kids/actions.ts` existe con `createChild`, `updateChild` y `deleteChild`.
+- [x] `createChild` inserta un niño en Supabase y revalida `/kids`.
+- [x] `updateChild` actualiza un niño existente y revalida `/kids` y `/kids/[id]`.
+- [x] `deleteChild` elimina un niño y revalida `/kids`.
+- [x] `AddKidModal` acepta prop `child?` y precarga el formulario en modo edición.
+- [x] El dropdown de sala usa `room_id` (uuid) en vez de `name`.
+- [x] `allergy_tags` se convierte de string libre a `text[]` (split por coma, trim, lowercase).
+- [x] La fecha `dd/mm/aaaa` se convierte a ISO antes de enviar a Supabase.
+- [x] El botón "Editar" en `KidProfile` abre el modal con los datos del niño.
+- [x] El botón "Eliminar" en `KidProfile` muestra confirmación y ejecuta `deleteChild`.
+- [x] Después de crear/editar/eliminar, la UI se actualiza sin recarga manual.
+- [x] `npm run lint` pasa sin errores.
+- [x] `npx tsc --noEmit` pasa sin errores.
 
 ## Decisions
 

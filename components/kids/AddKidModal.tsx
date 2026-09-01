@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import type { Database } from '@/types/database.types';
 import { useRouter } from 'next/navigation';
 import { createChild, updateChild } from '@/app/kids/actions';
@@ -15,15 +15,37 @@ interface AddKidModalProps {
   child?: Child;
 }
 
+function getChildDefaults(child: Child) {
+  const parts = child.birth_date.split('-');
+  return {
+    fullName: child.full_name,
+    birthDate: `${parts[2]}/${parts[1]}/${parts[0]}`,
+    roomId: child.room_id ?? '',
+    allergies: child.allergy_tags.join(', '),
+    medicalNotes: child.medical_notes,
+  };
+}
+
+const emptyDefaults = {
+  fullName: '',
+  birthDate: '',
+  roomId: '',
+  allergies: '',
+  medicalNotes: '',
+};
+
 export function AddKidModal({ open, onClose, rooms, child }: AddKidModalProps) {
   const router = useRouter();
   const isEditing = !!child;
+  const prevOpenRef = useRef(false);
 
-  const [fullName, setFullName] = useState('');
-  const [birthDate, setBirthDate] = useState('');
-  const [roomId, setRoomId] = useState('');
-  const [allergies, setAllergies] = useState('');
-  const [medicalNotes, setMedicalNotes] = useState('');
+  const defaults = open && child ? getChildDefaults(child) : emptyDefaults;
+
+  const [fullName, setFullName] = useState(defaults.fullName);
+  const [birthDate, setBirthDate] = useState(defaults.birthDate);
+  const [roomId, setRoomId] = useState(defaults.roomId);
+  const [allergies, setAllergies] = useState(defaults.allergies);
+  const [medicalNotes, setMedicalNotes] = useState(defaults.medicalNotes);
   const [isSaving, setIsSaving] = useState(false);
 
   const [nameError, setNameError] = useState('');
@@ -31,17 +53,18 @@ export function AddKidModal({ open, onClose, rooms, child }: AddKidModalProps) {
   const [roomError, setRoomError] = useState('');
 
   useEffect(() => {
-    if (open && child) {
-      setFullName(child.full_name);
-      const parts = child.birth_date.split('-');
-      setBirthDate(`${parts[2]}/${parts[1]}/${parts[0]}`);
-      setRoomId(child.room_id ?? '');
-      setAllergies(child.allergy_tags.join(', '));
-      setMedicalNotes(child.medical_notes);
-    } else if (open) {
-      resetForm();
+    if (open && !prevOpenRef.current) {
+      setFullName(defaults.fullName);
+      setBirthDate(defaults.birthDate);
+      setRoomId(defaults.roomId);
+      setAllergies(defaults.allergies);
+      setMedicalNotes(defaults.medicalNotes);
+      setNameError('');
+      setDateError('');
+      setRoomError('');
     }
-  }, [open, child]);
+    prevOpenRef.current = open;
+  }, [open, defaults]);
 
   const handleDateChange = (value: string) => {
     const digits = value.replace(/\D/g, '').slice(0, 8);
@@ -101,24 +124,12 @@ export function AddKidModal({ open, onClose, rooms, child }: AddKidModalProps) {
       }
 
       router.refresh();
-      resetForm();
       onClose();
     } catch {
       setNameError('Error al guardar. Intenta de nuevo.');
     } finally {
       setIsSaving(false);
     }
-  };
-
-  const resetForm = () => {
-    setFullName('');
-    setBirthDate('');
-    setRoomId('');
-    setAllergies('');
-    setMedicalNotes('');
-    setNameError('');
-    setDateError('');
-    setRoomError('');
   };
 
   const handleBackdropClick = (e: React.MouseEvent) => {

@@ -50,3 +50,13 @@ INSERT INTO auth.users (
 );
 
 -- La fila en public.users se crea automáticamente vía el trigger on_auth_user_created.
+
+-- Salas por defecto
+INSERT INTO public.rooms (daycare_id, name)
+SELECT id, 'Soles' FROM public.daycares WHERE name = 'Guardería Sala Soles';
+
+INSERT INTO public.rooms (daycare_id, name)
+SELECT id, 'Estrellas' FROM public.daycares WHERE name = 'Guardería Sala Soles';
+
+INSERT INTO public.rooms (daycare_id, name)
+SELECT id, 'Lunas' FROM public.daycares WHERE name = 'Guardería Sala Soles';

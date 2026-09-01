@@ -5,6 +5,7 @@ type Child = Database['public']['Tables']['children']['Row'];
 
 interface KidCardProps {
   kid: Child;
+  onEdit?: (kid: Child) => void;
 }
 
 function calculateAge(birthDate: string): number {
@@ -34,18 +35,18 @@ function getAvatarColor(id: string) {
   return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
 }
 
-export function KidCard({ kid }: KidCardProps) {
-  const hasAllergies = kid.allergy_tags.length > 0;
-  const avatar = getAvatarColor(kid.id);
-  const initial = kid.full_name.charAt(0).toUpperCase();
-  const age = calculateAge(kid.birth_date);
-  const noParents = true;
+const cardClass = "kid-card-hover flex items-center gap-[14px] min-w-0 bg-card border border-line rounded-[18px] px-4 py-4 shadow-[0_4px_14px_-12px_rgba(120,90,60,0.5)] transition-[transform,border-color] duration-150 hover:border-[#F2A78E]";
 
+function CardContent({ kid, hasAllergies, avatar, initial, age }: {
+  kid: Child;
+  hasAllergies: boolean;
+  avatar: { bg: string; color: string };
+  initial: string;
+  age: number;
+}) {
+  const noParents = true;
   return (
-    <Link
-      href={`/kids/${kid.id}`}
-      className="kid-card-hover flex items-center gap-[14px] min-w-0 bg-card border border-line rounded-[18px] px-4 py-4 shadow-[0_4px_14px_-12px_rgba(120,90,60,0.5)] transition-[transform,border-color] duration-150 hover:border-[#F2A78E]"
-    >
+    <>
       <div
         className="w-12 h-12 rounded-full font-head font-semibold text-[19px] flex items-center justify-center shrink-0"
         style={{ background: avatar.bg, color: avatar.color }}
@@ -73,6 +74,34 @@ export function KidCard({ kid }: KidCardProps) {
       ) : (
         <svg className="flex-none w-[18px] h-[18px] text-[#CBB89F]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"/></svg>
       )}
+    </>
+  );
+}
+
+export function KidCard({ kid, onEdit }: KidCardProps) {
+  const hasAllergies = kid.allergy_tags.length > 0;
+  const avatar = getAvatarColor(kid.id);
+  const initial = kid.full_name.charAt(0).toUpperCase();
+  const age = calculateAge(kid.birth_date);
+
+  if (onEdit) {
+    return (
+      <button
+        type="button"
+        onClick={() => onEdit(kid)}
+        className={`${cardClass} cursor-pointer text-left w-full`}
+      >
+        <CardContent kid={kid} hasAllergies={hasAllergies} avatar={avatar} initial={initial} age={age} />
+      </button>
+    );
+  }
+
+  return (
+    <Link
+      href={`/kids/${kid.id}`}
+      className={cardClass}
+    >
+      <CardContent kid={kid} hasAllergies={hasAllergies} avatar={avatar} initial={initial} age={age} />
     </Link>
   );
 }

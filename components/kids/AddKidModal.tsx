@@ -1,26 +1,17 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import {
-  Kid,
-  generateKidId,
-  calculateAge,
-  formatBirthDateDisplay,
-  parseAllergyText,
-  randomAvatarBg,
-  randomAvatarColor,
-  isValidDate,
-} from '@/app/_data/kids';
+import type { Database } from '@/types/database.types';
 
-const ROOMS = ['Soles', 'Estrellas', 'Arcoíris'];
+type Room = Database['public']['Tables']['rooms']['Row'];
 
 interface AddKidModalProps {
   open: boolean;
   onClose: () => void;
-  onAdd: (kid: Kid) => void;
+  rooms: Room[];
 }
 
-export function AddKidModal({ open, onClose, onAdd }: AddKidModalProps) {
+export function AddKidModal({ open, onClose, rooms }: AddKidModalProps) {
   const [fullName, setFullName] = useState('');
   const [birthDate, setBirthDate] = useState('');
   const [room, setRoom] = useState('');
@@ -52,12 +43,8 @@ export function AddKidModal({ open, onClose, onAdd }: AddKidModalProps) {
       valid = false;
     }
 
-    if (birthDate.length < 10 || !isValidDate(birthDate)) {
-      setDateError(
-        birthDate.length < 10
-          ? 'La fecha debe estar completa (dd/mm/aaaa)'
-          : 'La fecha no es válida',
-      );
+    if (birthDate.length < 10) {
+      setDateError('La fecha debe estar completa (dd/mm/aaaa)');
       valid = false;
     }
 
@@ -68,41 +55,6 @@ export function AddKidModal({ open, onClose, onAdd }: AddKidModalProps) {
 
     if (!valid) return;
 
-    const newKid: Kid = {
-      id: generateKidId(fullName),
-      firstName: fullName.trim().split(' ')[0],
-      lastName: fullName.trim().split(' ').slice(1).join(' '),
-      fullName: fullName.trim(),
-      initial: fullName.trim().charAt(0).toUpperCase(),
-      age: calculateAge(birthDate),
-      room,
-      birthDate: formatBirthDateDisplay(birthDate),
-      enrollmentDate: (() => {
-        const now = new Date();
-        const months = [
-          'ene',
-          'feb',
-          'mar',
-          'abr',
-          'may',
-          'jun',
-          'jul',
-          'ago',
-          'sep',
-          'oct',
-          'nov',
-          'dic',
-        ];
-        return `${months[now.getMonth()]} ${now.getFullYear()}`;
-      })(),
-      allergies: parseAllergyText(allergies),
-      medicalNotes: medicalNotes.trim(),
-      linkedParents: [],
-      avatarBg: randomAvatarBg(),
-      avatarColor: randomAvatarColor(),
-    };
-
-    onAdd(newKid);
     resetForm();
     onClose();
   };
@@ -226,9 +178,9 @@ export function AddKidModal({ open, onClose, onAdd }: AddKidModalProps) {
                   <option value="" disabled>
                     Seleccionar sala
                   </option>
-                  {ROOMS.map((r) => (
-                    <option key={r} value={r}>
-                      {r}
+                  {rooms.map((r) => (
+                    <option key={r.id} value={r.name}>
+                      {r.name}
                     </option>
                   ))}
                 </select>

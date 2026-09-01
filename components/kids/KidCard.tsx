@@ -1,22 +1,45 @@
 import Link from 'next/link';
-import type { Kid } from '@/app/_data/kids';
-import {
-  ALLERGY_BADGE,
-  ALLERGY_LABEL,
-  parentCountLabel,
-} from '@/app/_data/kids';
-import { ChevronRightIcon } from '@/components/shared/icons';
+import type { Database } from '@/types/database.types';
+
+type Child = Database['public']['Tables']['children']['Row'];
 
 interface KidCardProps {
-  kid: Kid;
+  kid: Child;
+}
+
+function calculateAge(birthDate: string): number {
+  const birth = new Date(birthDate);
+  const today = new Date();
+  let age = today.getFullYear() - birth.getFullYear();
+  const m = today.getMonth() - birth.getMonth();
+  if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) {
+    age--;
+  }
+  return age < 0 ? 0 : age;
+}
+
+const AVATAR_COLORS = [
+  { bg: '#A9D9E8', color: '#1F7A93' },
+  { bg: '#F4B8CC', color: '#C44A7A' },
+  { bg: '#B9DEC4', color: '#3E8B62' },
+  { bg: '#F4DC8E', color: '#9A7B1E' },
+  { bg: '#C9B6E8', color: '#7B5FC0' },
+];
+
+function getAvatarColor(id: string) {
+  let hash = 0;
+  for (let i = 0; i < id.length; i++) {
+    hash = id.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
 }
 
 export function KidCard({ kid }: KidCardProps) {
-  const hasAllergies = kid.allergies.length > 0;
-  const firstAllergy = hasAllergies ? kid.allergies[0] : 'none';
-  const badge = ALLERGY_BADGE[firstAllergy];
-  const parentsLabel = parentCountLabel(kid.linkedParents);
-  const noParents = kid.linkedParents.length === 0;
+  const hasAllergies = kid.allergy_tags.length > 0;
+  const avatar = getAvatarColor(kid.id);
+  const initial = kid.full_name.charAt(0).toUpperCase();
+  const age = calculateAge(kid.birth_date);
+  const noParents = true;
 
   return (
     <Link
@@ -25,31 +48,30 @@ export function KidCard({ kid }: KidCardProps) {
     >
       <div
         className="w-12 h-12 rounded-full font-head font-semibold text-[19px] flex items-center justify-center shrink-0"
-        style={{ background: kid.avatarBg, color: kid.avatarColor }}
+        style={{ background: avatar.bg, color: avatar.color }}
       >
-        {kid.initial}
+        {initial}
       </div>
       <div className="flex-1 min-w-0">
         <div className="font-head font-semibold text-[16px] text-ink truncate">
-          {kid.fullName}
+          {kid.full_name}
         </div>
         <div className="text-[13px] text-muted">
-          {kid.age} años · {parentsLabel}
+          {age} años
         </div>
       </div>
       {hasAllergies ? (
         <span
-          className="flex-none text-[11px] font-extrabold px-[9px] py-[5px] rounded-full"
-          style={{ background: badge.bg, color: badge.color }}
+          className="flex-none text-[11px] font-extrabold px-[9px] py-[5px] rounded-full bg-[#FBD8CC] text-[#D9684A]"
         >
-          {ALLERGY_LABEL[firstAllergy]}
+          ALERGIA
         </span>
       ) : noParents ? (
         <span className="flex-none text-[11px] font-extrabold px-[9px] py-[5px] rounded-full bg-[#F9D2DE] text-[#C56486]">
           VINCULAR
         </span>
       ) : (
-        <ChevronRightIcon className="flex-none w-[18px] h-[18px] text-[#CBB89F]" />
+        <svg className="flex-none w-[18px] h-[18px] text-[#CBB89F]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"/></svg>
       )}
     </Link>
   );

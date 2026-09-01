@@ -12,33 +12,58 @@ export type Database = {
   __InternalSupabase: {
     PostgrestVersion: "14.5"
   }
-  graphql_public: {
-    Tables: {
-      [_ in never]: never
-    }
-    Views: {
-      [_ in never]: never
-    }
-    Functions: {
-      graphql: {
-        Args: {
-          extensions?: Json
-          operationName?: string
-          query?: string
-          variables?: Json
-        }
-        Returns: Json
-      }
-    }
-    Enums: {
-      [_ in never]: never
-    }
-    CompositeTypes: {
-      [_ in never]: never
-    }
-  }
   public: {
     Tables: {
+      children: {
+        Row: {
+          allergy_tags: string[]
+          birth_date: string
+          created_at: string
+          enrolled_at: string
+          full_name: string
+          id: string
+          medical_notes: string
+          photo_consent: boolean
+          room_id: string | null
+          status: Database["public"]["Enums"]["child_status"]
+          updated_at: string
+        }
+        Insert: {
+          allergy_tags?: string[]
+          birth_date: string
+          created_at?: string
+          enrolled_at?: string
+          full_name: string
+          id?: string
+          medical_notes?: string
+          photo_consent?: boolean
+          room_id?: string | null
+          status?: Database["public"]["Enums"]["child_status"]
+          updated_at?: string
+        }
+        Update: {
+          allergy_tags?: string[]
+          birth_date?: string
+          created_at?: string
+          enrolled_at?: string
+          full_name?: string
+          id?: string
+          medical_notes?: string
+          photo_consent?: boolean
+          room_id?: string | null
+          status?: Database["public"]["Enums"]["child_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "children_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "rooms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       daycares: {
         Row: {
           created_at: string
@@ -56,6 +81,35 @@ export type Database = {
           name?: string
         }
         Relationships: []
+      }
+      rooms: {
+        Row: {
+          created_at: string
+          daycare_id: string
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          daycare_id: string
+          id?: string
+          name: string
+        }
+        Update: {
+          created_at?: string
+          daycare_id?: string
+          id?: string
+          name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rooms_daycare_id_fkey"
+            columns: ["daycare_id"]
+            isOneToOne: false
+            referencedRelation: "daycares"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       users: {
         Row: {
@@ -112,6 +166,7 @@ export type Database = {
       get_my_daycare_id: { Args: never; Returns: string }
     }
     Enums: {
+      child_status: "active" | "archived"
       user_role: "staff" | "parent" | "admin"
       user_status: "pending" | "active"
     }
@@ -239,11 +294,9 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
-  graphql_public: {
-    Enums: {},
-  },
   public: {
     Enums: {
+      child_status: ["active", "archived"],
       user_role: ["staff", "parent", "admin"],
       user_status: ["pending", "active"],
     },

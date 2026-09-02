@@ -78,7 +78,7 @@ INSERT INTO auth.users (
 ) VALUES (
   gen_random_uuid(), '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated',
   'padre@opendaycare.test', now(), crypt('padre12345', gen_salt('bf')),
-  '', '', '', '', '', '', '', '', '', false, '{}'::jsonb,
+  '', '', '', NULL, '', '', '', '', '', false, '{}'::jsonb,
   jsonb_build_object(
     'daycare_id', (SELECT id FROM public.daycares WHERE name = 'Guardería Sala Soles'),
     'role', 'parent', 'full_name', 'Lucía Parent'

@@ -302,6 +302,10 @@ export type Database = {
         }[]
       }
       get_my_daycare_id: { Args: never; Returns: string }
+      get_my_role: {
+        Args: never
+        Returns: Database["public"]["Enums"]["user_role"]
+      }
     }
     Enums: {
       child_status: "active" | "archived"

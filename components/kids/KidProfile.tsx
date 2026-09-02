@@ -9,15 +9,38 @@ import { MobileNav } from '@/components/shared/MobileNav';
 import { ChevronLeftIcon, AlertTriangleIcon, EditIcon } from '@/components/shared/icons';
 import { LinkParentModal } from '@/components/kids/LinkParentModal';
 import { AddKidModal } from '@/components/kids/AddKidModal';
+import { PARENT_STATUS_LABEL, PARENT_STATUS_BADGE } from '@/app/_data/kids';
 import { deleteChild } from '@/app/kids/actions';
 
 type Child = Database['public']['Tables']['children']['Row'];
 type Room = Database['public']['Tables']['rooms']['Row'];
+type Relationship = Database['public']['Enums']['relationship_type'];
+
+const RELATIONSHIP_LABEL: Record<Relationship, string> = {
+  mother: 'Mamá',
+  father: 'Papá',
+  guardian: 'Tutor/a',
+};
+
+interface LinkedParentItem {
+  parent_id: string;
+  full_name: string;
+  relationship: Relationship;
+}
+
+interface PendingInvitationItem {
+  id: string;
+  full_name: string;
+  email: string;
+  relationship: Relationship;
+}
 
 interface KidProfileProps {
   kid: Child;
   roomName: string | null;
   rooms: Room[];
+  linkedParents: LinkedParentItem[];
+  pendingInvitations: PendingInvitationItem[];
 }
 
 function calculateAge(birthDate: string): number {
@@ -53,7 +76,13 @@ function getAvatarColor(id: string) {
   return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
 }
 
-export function KidProfile({ kid, roomName, rooms }: KidProfileProps) {
+export function KidProfile({
+  kid,
+  roomName,
+  rooms,
+  linkedParents,
+  pendingInvitations,
+}: KidProfileProps) {
   const router = useRouter();
   const [showLinkParent, setShowLinkParent] = useState(false);
   const [editingKid, setEditingKid] = useState(false);
@@ -190,11 +219,76 @@ export function KidProfile({ kid, roomName, rooms }: KidProfileProps) {
                 <div className="text-[12.5px] font-extrabold tracking-[0.8px] text-[#8A7C6D] mb-[14px]">
                   PADRES VINCULADOS
                 </div>
-                <div className="flex flex-col gap-[14px]">
+              <div className="flex flex-col gap-[14px]">
+                {linkedParents.map((parent) => {
+                  const avatar = getAvatarColor(parent.parent_id);
+                  return (
+                    <div key={parent.parent_id} className="flex items-center gap-[12px]">
+                      <span
+                        className="w-10 h-10 rounded-full font-head font-semibold text-[16px] flex items-center justify-center shrink-0"
+                        style={{ background: avatar.bg, color: avatar.color }}
+                      >
+                        {parent.full_name.charAt(0).toUpperCase()}
+                      </span>
+                      <div className="flex-1 min-w-0">
+                        <div className="font-extrabold text-[14.5px] text-ink truncate">
+                          {parent.full_name}
+                        </div>
+                        <div className="text-[12.5px] text-muted">
+                          {RELATIONSHIP_LABEL[parent.relationship]}
+                        </div>
+                      </div>
+                      <span
+                        className="text-[11px] font-extrabold tracking-wide px-2.5 py-1 rounded-full shrink-0"
+                        style={{
+                          background: PARENT_STATUS_BADGE.active.bg,
+                          color: PARENT_STATUS_BADGE.active.color,
+                        }}
+                      >
+                        {PARENT_STATUS_LABEL.active}
+                      </span>
+                    </div>
+                  );
+                })}
+
+                {pendingInvitations.map((inv) => {
+                  const avatar = getAvatarColor(inv.id);
+                  return (
+                    <div key={inv.id} className="flex items-center gap-[12px]">
+                      <span
+                        className="w-10 h-10 rounded-full font-head font-semibold text-[16px] flex items-center justify-center shrink-0"
+                        style={{ background: avatar.bg, color: avatar.color }}
+                      >
+                        {inv.full_name.charAt(0).toUpperCase()}
+                      </span>
+                      <div className="flex-1 min-w-0">
+                        <div className="font-extrabold text-[14.5px] text-ink truncate">
+                          {inv.full_name}
+                        </div>
+                        <div className="text-[12.5px] text-muted truncate">
+                          {RELATIONSHIP_LABEL[inv.relationship]} · {inv.email}
+                        </div>
+                      </div>
+                      <span
+                        className="text-[11px] font-extrabold tracking-wide px-2.5 py-1 rounded-full shrink-0"
+                        style={{
+                          background: PARENT_STATUS_BADGE.pending.bg,
+                          color: PARENT_STATUS_BADGE.pending.color,
+                        }}
+                      >
+                        {PARENT_STATUS_LABEL.pending}
+                      </span>
+                    </div>
+                  );
+                })}
+
+                {linkedParents.length === 0 && pendingInvitations.length === 0 && (
                   <div className="text-[14px] text-muted">
                     Sin padres vinculados
                   </div>
-                  <button
+                )}
+
+                <button
                     type="button"
                     onClick={() => setShowLinkParent(true)}
                     className="flex items-center gap-[12px] pt-2 bg-none border-none cursor-pointer p-0"

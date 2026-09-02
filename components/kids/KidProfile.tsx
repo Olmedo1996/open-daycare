@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import type { Database } from '@/types/database.types';
@@ -9,15 +9,38 @@ import { MobileNav } from '@/components/shared/MobileNav';
 import { ChevronLeftIcon, AlertTriangleIcon, EditIcon } from '@/components/shared/icons';
 import { LinkParentModal } from '@/components/kids/LinkParentModal';
 import { AddKidModal } from '@/components/kids/AddKidModal';
+import { PARENT_STATUS_LABEL, PARENT_STATUS_BADGE } from '@/app/_data/kids';
 import { deleteChild } from '@/app/kids/actions';
 
 type Child = Database['public']['Tables']['children']['Row'];
 type Room = Database['public']['Tables']['rooms']['Row'];
+type Relationship = Database['public']['Enums']['relationship_type'];
+
+const RELATIONSHIP_LABEL: Record<Relationship, string> = {
+  mother: 'Mamá',
+  father: 'Papá',
+  guardian: 'Tutor/a',
+};
+
+interface LinkedParentItem {
+  parent_id: string;
+  full_name: string;
+  relationship: Relationship;
+}
+
+interface PendingInvitationItem {
+  id: string;
+  full_name: string;
+  email: string;
+  relationship: Relationship;
+}
 
 interface KidProfileProps {
   kid: Child;
   roomName: string | null;
   rooms: Room[];
+  linkedParents: LinkedParentItem[];
+  pendingInvitations: PendingInvitationItem[];
 }
 
 function calculateAge(birthDate: string): number {
@@ -53,14 +76,34 @@ function getAvatarColor(id: string) {
   return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
 }
 
-export function KidProfile({ kid, roomName, rooms }: KidProfileProps) {
+export function KidProfile({
+  kid,
+  roomName,
+  rooms,
+  linkedParents,
+  pendingInvitations,
+}: KidProfileProps) {
   const router = useRouter();
   const [showLinkParent, setShowLinkParent] = useState(false);
   const [editingKid, setEditingKid] = useState(false);
+  const [toast, setToast] = useState<string | null>(null);
+  const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const hasAllergies = kid.allergy_tags.length > 0;
   const avatar = getAvatarColor(kid.id);
   const initial = kid.full_name.charAt(0).toUpperCase();
   const age = calculateAge(kid.birth_date);
+
+  const showToast = (message: string) => {
+    setToast(message);
+    if (toastTimer.current) clearTimeout(toastTimer.current);
+    toastTimer.current = setTimeout(() => setToast(null), 3500);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (toastTimer.current) clearTimeout(toastTimer.current);
+    };
+  }, []);
 
   const handleDelete = async () => {
     if (!confirm(`¿Eliminar a ${kid.full_name}? Esta acción no se puede deshacer.`)) {
@@ -176,11 +219,76 @@ export function KidProfile({ kid, roomName, rooms }: KidProfileProps) {
                 <div className="text-[12.5px] font-extrabold tracking-[0.8px] text-[#8A7C6D] mb-[14px]">
                   PADRES VINCULADOS
                 </div>
-                <div className="flex flex-col gap-[14px]">
+              <div className="flex flex-col gap-[14px]">
+                {linkedParents.map((parent) => {
+                  const avatar = getAvatarColor(parent.parent_id);
+                  return (
+                    <div key={parent.parent_id} className="flex items-center gap-[12px]">
+                      <span
+                        className="w-10 h-10 rounded-full font-head font-semibold text-[16px] flex items-center justify-center shrink-0"
+                        style={{ background: avatar.bg, color: avatar.color }}
+                      >
+                        {parent.full_name.charAt(0).toUpperCase()}
+                      </span>
+                      <div className="flex-1 min-w-0">
+                        <div className="font-extrabold text-[14.5px] text-ink truncate">
+                          {parent.full_name}
+                        </div>
+                        <div className="text-[12.5px] text-muted">
+                          {RELATIONSHIP_LABEL[parent.relationship]}
+                        </div>
+                      </div>
+                      <span
+                        className="text-[11px] font-extrabold tracking-wide px-2.5 py-1 rounded-full shrink-0"
+                        style={{
+                          background: PARENT_STATUS_BADGE.active.bg,
+                          color: PARENT_STATUS_BADGE.active.color,
+                        }}
+                      >
+                        {PARENT_STATUS_LABEL.active}
+                      </span>
+                    </div>
+                  );
+                })}
+
+                {pendingInvitations.map((inv) => {
+                  const avatar = getAvatarColor(inv.id);
+                  return (
+                    <div key={inv.id} className="flex items-center gap-[12px]">
+                      <span
+                        className="w-10 h-10 rounded-full font-head font-semibold text-[16px] flex items-center justify-center shrink-0"
+                        style={{ background: avatar.bg, color: avatar.color }}
+                      >
+                        {inv.full_name.charAt(0).toUpperCase()}
+                      </span>
+                      <div className="flex-1 min-w-0">
+                        <div className="font-extrabold text-[14.5px] text-ink truncate">
+                          {inv.full_name}
+                        </div>
+                        <div className="text-[12.5px] text-muted truncate">
+                          {RELATIONSHIP_LABEL[inv.relationship]} · {inv.email}
+                        </div>
+                      </div>
+                      <span
+                        className="text-[11px] font-extrabold tracking-wide px-2.5 py-1 rounded-full shrink-0"
+                        style={{
+                          background: PARENT_STATUS_BADGE.pending.bg,
+                          color: PARENT_STATUS_BADGE.pending.color,
+                        }}
+                      >
+                        {PARENT_STATUS_LABEL.pending}
+                      </span>
+                    </div>
+                  );
+                })}
+
+                {linkedParents.length === 0 && pendingInvitations.length === 0 && (
                   <div className="text-[14px] text-muted">
                     Sin padres vinculados
                   </div>
-                  <button
+                )}
+
+                <button
                     type="button"
                     onClick={() => setShowLinkParent(true)}
                     className="flex items-center gap-[12px] pt-2 bg-none border-none cursor-pointer p-0"
@@ -232,8 +340,9 @@ export function KidProfile({ kid, roomName, rooms }: KidProfileProps) {
       <LinkParentModal
         open={showLinkParent}
         kidName={kid.full_name}
+        childId={kid.id}
         onClose={() => setShowLinkParent(false)}
-        onLink={() => {}}
+        onSuccess={() => showToast('Invitación enviada')}
       />
       <AddKidModal
         open={editingKid}
@@ -241,6 +350,22 @@ export function KidProfile({ kid, roomName, rooms }: KidProfileProps) {
         rooms={rooms}
         child={kid}
       />
+      {toast && (
+        <div className="fixed bottom-6 left-1/2 z-[60] flex -translate-x-1/2 items-center gap-2 rounded-full bg-[#3F362E] px-5 py-3 text-[14px] font-bold text-white shadow-[0_10px_24px_-10px_rgba(63,54,46,.6)]">
+          <svg
+            className="h-[18px] w-[18px] text-[#5FB97E]"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.4"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M20 6 9 17l-5-5" />
+          </svg>
+          {toast}
+        </div>
+      )}
     </div>
   );
 }

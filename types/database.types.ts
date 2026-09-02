@@ -12,6 +12,31 @@ export type Database = {
   __InternalSupabase: {
     PostgrestVersion: "14.5"
   }
+  graphql_public: {
+    Tables: {
+      [_ in never]: never
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      graphql: {
+        Args: {
+          extensions?: Json
+          operationName?: string
+          query?: string
+          variables?: Json
+        }
+        Returns: Json
+      }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
   public: {
     Tables: {
       children: {
@@ -81,6 +106,102 @@ export type Database = {
           name?: string
         }
         Relationships: []
+      }
+      invitations: {
+        Row: {
+          accepted_at: string | null
+          child_id: string
+          code: string
+          created_at: string
+          email: string
+          expires_at: string
+          full_name: string
+          id: string
+          invited_by: string | null
+          relationship: Database["public"]["Enums"]["relationship_type"]
+          status: Database["public"]["Enums"]["invitation_status"]
+        }
+        Insert: {
+          accepted_at?: string | null
+          child_id: string
+          code: string
+          created_at?: string
+          email: string
+          expires_at: string
+          full_name: string
+          id?: string
+          invited_by?: string | null
+          relationship: Database["public"]["Enums"]["relationship_type"]
+          status?: Database["public"]["Enums"]["invitation_status"]
+        }
+        Update: {
+          accepted_at?: string | null
+          child_id?: string
+          code?: string
+          created_at?: string
+          email?: string
+          expires_at?: string
+          full_name?: string
+          id?: string
+          invited_by?: string | null
+          relationship?: Database["public"]["Enums"]["relationship_type"]
+          status?: Database["public"]["Enums"]["invitation_status"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invitations_child_id_fkey"
+            columns: ["child_id"]
+            isOneToOne: false
+            referencedRelation: "children"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invitations_invited_by_fkey"
+            columns: ["invited_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      parent_children: {
+        Row: {
+          child_id: string
+          created_at: string
+          id: string
+          parent_id: string
+          relationship: Database["public"]["Enums"]["relationship_type"]
+        }
+        Insert: {
+          child_id: string
+          created_at?: string
+          id?: string
+          parent_id: string
+          relationship: Database["public"]["Enums"]["relationship_type"]
+        }
+        Update: {
+          child_id?: string
+          created_at?: string
+          id?: string
+          parent_id?: string
+          relationship?: Database["public"]["Enums"]["relationship_type"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "parent_children_child_id_fkey"
+            columns: ["child_id"]
+            isOneToOne: false
+            referencedRelation: "children"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "parent_children_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       rooms: {
         Row: {
@@ -163,10 +284,33 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      complete_invitation: {
+        Args: { p_code: string; p_email: string }
+        Returns: undefined
+      }
+      get_invitation_by_code: {
+        Args: { p_code: string; p_email: string }
+        Returns: {
+          child_id: string
+          child_name: string
+          daycare_id: string
+          email: string
+          full_name: string
+          id: string
+          relationship: Database["public"]["Enums"]["relationship_type"]
+          room_name: string
+        }[]
+      }
       get_my_daycare_id: { Args: never; Returns: string }
+      get_my_role: {
+        Args: never
+        Returns: Database["public"]["Enums"]["user_role"]
+      }
     }
     Enums: {
       child_status: "active" | "archived"
+      invitation_status: "pending" | "accepted" | "expired" | "cancelled"
+      relationship_type: "father" | "mother" | "guardian"
       user_role: "staff" | "parent" | "admin"
       user_status: "pending" | "active"
     }
@@ -294,9 +438,14 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
+  graphql_public: {
+    Enums: {},
+  },
   public: {
     Enums: {
       child_status: ["active", "archived"],
+      invitation_status: ["pending", "accepted", "expired", "cancelled"],
+      relationship_type: ["father", "mother", "guardian"],
       user_role: ["staff", "parent", "admin"],
       user_status: ["pending", "active"],
     },

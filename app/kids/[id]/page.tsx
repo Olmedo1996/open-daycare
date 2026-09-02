@@ -65,5 +65,44 @@ export default async function KidProfilePage({ params }: KidProfilePageProps) {
     .select('*')
     .order('name');
 
-  return <KidProfile kid={kid} roomName={roomName} rooms={rooms ?? []} />;
+  const { data: parentLinks } = await supabase
+    .from('parent_children')
+    .select('parent_id, relationship')
+    .eq('child_id', id);
+
+  const parentIds = (parentLinks ?? []).map((link) => link.parent_id);
+  const { data: parentUsers } = parentIds.length
+    ? await supabase.from('users').select('id, full_name').in('id', parentIds)
+    : { data: [] };
+
+  const linkedParents = (parentLinks ?? []).map((link) => ({
+    parent_id: link.parent_id,
+    full_name:
+      parentUsers?.find((u) => u.id === link.parent_id)?.full_name ?? 'Padre',
+    relationship: link.relationship,
+  }));
+
+  const { data: invitations } = await supabase
+    .from('invitations')
+    .select('id, full_name, email, relationship')
+    .eq('child_id', id)
+    .eq('status', 'pending')
+    .order('created_at', { ascending: false });
+
+  const pendingInvitations = (invitations ?? []).map((inv) => ({
+    id: inv.id,
+    full_name: inv.full_name,
+    email: inv.email,
+    relationship: inv.relationship,
+  }));
+
+  return (
+    <KidProfile
+      kid={kid}
+      roomName={roomName}
+      rooms={rooms ?? []}
+      linkedParents={linkedParents}
+      pendingInvitations={pendingInvitations}
+    />
+  );
 }

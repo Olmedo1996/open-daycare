@@ -1,6 +1,31 @@
 import Link from 'next/link';
+import { Suspense } from 'react';
+import { createClient } from '@/lib/supabase/server';
+import { ActivateForm } from './activate-form';
 
-export default function ActivatePage() {
+export default async function ActivatePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ code?: string; email?: string }>;
+}) {
+  const { code, email } = await searchParams;
+
+  let invitation: { child_name: string; room_name: string | null } | null = null;
+
+  if (code && email) {
+    const supabase = await createClient();
+    const { data, error } = await supabase.rpc('get_invitation_by_code', {
+      p_code: code,
+      p_email: email,
+    });
+    if (!error && data && data.length > 0) {
+      invitation = {
+        child_name: data[0].child_name,
+        room_name: data[0].room_name,
+      };
+    }
+  }
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#FBF4EC] p-10">
       <div className="w-full max-w-[440px]">
@@ -31,76 +56,27 @@ export default function ActivatePage() {
         </p>
 
         {/* Invitation card */}
-        <div className="flex items-center gap-[14px] bg-white border-[1.5px] border-[#EADFD0] rounded-[16px] p-3.5 px-4 mb-[22px]">
-          <div className="w-[44px] h-[44px] rounded-full bg-[#A9D9E8] text-[#1F7A93] font-head font-semibold text-[19px] flex items-center justify-center">
-            M
-          </div>
-          <div>
-            <div className="text-sm text-[#94887B]">
-              Te invitaron a seguir a
+        {invitation ? (
+          <div className="flex items-center gap-[14px] bg-white border-[1.5px] border-[#EADFD0] rounded-[16px] p-3.5 px-4 mb-[22px]">
+            <div className="w-[44px] h-[44px] rounded-full bg-[#A9D9E8] text-[#1F7A93] font-head font-semibold text-[19px] flex items-center justify-center">
+              {invitation.child_name.charAt(0).toUpperCase()}
             </div>
-            <div className="font-head font-semibold text-lg text-[#3F362E]">
-              Mateo · Sala Soles
+            <div>
+              <div className="text-sm text-[#94887B]">
+                Te invitaron a seguir a
+              </div>
+              <div className="font-head font-semibold text-lg text-[#3F362E]">
+                {invitation.child_name} · Sala{' '}
+                {invitation.room_name ?? 'Sin sala'}
+              </div>
             </div>
           </div>
-        </div>
+        ) : null}
 
-        {/* Invitation code */}
-        <div className="text-xs font-bold tracking-wider text-[#94887B] mb-2">
-          CÓDIGO DE INVITACIÓN
-        </div>
-        <input
-          type="text"
-          defaultValue="7K4P9"
-          className="w-full p-3.5 px-4 rounded-[14px] border-[1.5px] border-[#EADFD0] bg-white text-lg tracking-[3px] font-bold text-[#3F362E] mb-4 placeholder:text-[#B6A99B] font-head"
-        />
-
-        {/* Email */}
-        <div className="text-xs font-bold tracking-wider text-[#94887B] mb-2">
-          EMAIL
-        </div>
-        <input
-          type="email"
-          defaultValue="lucia.fernandez@gmail.com"
-          className="w-full p-3.5 px-4 rounded-[14px] border-[1.5px] border-[#EADFD0] bg-white text-base text-[#3F362E] mb-4 placeholder:text-[#B6A99B]"
-        />
-
-        {/* Password */}
-        <div className="text-xs font-bold tracking-wider text-[#94887B] mb-2">
-          CREAR CONTRASEÑA
-        </div>
-        <input
-          type="password"
-          defaultValue="contraseña"
-          className="w-full p-3.5 px-4 rounded-[14px] border-[1.5px] border-[#F2A78E] bg-white text-base text-[#3F362E] mb-[18px] placeholder:text-[#B6A99B]"
-        />
-
-        {/* Authorization checkbox */}
-        <label className="flex items-start gap-3 bg-[#FBF1D6] rounded-[14px] p-3.5 px-4 mb-6 cursor-pointer">
-          <span className="flex-none w-6 h-6 rounded-[8px] bg-[#5FB97E] flex items-center justify-center mt-[1px]">
-            <svg
-              width="15"
-              height="15"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="#fff"
-              strokeWidth="3"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <polyline points="20 6 9 17 4 12" />
-            </svg>
-          </span>
-          <span className="text-sm text-[#8A7234] leading-[1.45]">
-            Autorizo a la guardería a tomar y compartir fotos de mi hijo dentro
-            de la app.
-          </span>
-        </label>
-
-        {/* Activate button */}
-        <div className="block text-center w-full p-4 rounded-[15px] bg-linear-to-b from-[#F4977E] to-[#EE8164] text-white font-extrabold text-base cursor-default shadow-[0_10px_22px_-8px_rgba(238,129,100,0.7)]">
-          Activar mi cuenta
-        </div>
+        {/* Activation form */}
+        <Suspense fallback={null}>
+          <ActivateForm />
+        </Suspense>
 
         {/* Footer link */}
         <p className="text-center mt-[22px] text-[#94887B] text-[14.5px]">

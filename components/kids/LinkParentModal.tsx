@@ -2,42 +2,50 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { CloseIcon } from '@/components/shared/icons';
-import {
-  LinkedParent,
-  ParentStatus,
-  randomAvatarBg,
-  randomAvatarColor,
-  isValidEmail,
-} from '@/app/_data/kids';
+import { isValidEmail } from '@/app/_data/kids';
+import { createInvitation } from '@/app/kids/actions';
 
 interface LinkParentModalProps {
   open: boolean;
   kidName: string;
+  childId: string;
   onClose: () => void;
-  onLink: (parent: LinkedParent) => void;
+  onSuccess: () => void;
 }
 
-const ROLES = ['Mamá', 'Papá', 'Tutor/a'] as const;
+type RoleKey = 'Mamá' | 'Papá' | 'Tutor/a';
+
+const ROLES: RoleKey[] = ['Mamá', 'Papá', 'Tutor/a'];
+
+const ROLE_MAP: Record<RoleKey, 'mother' | 'father' | 'guardian'> = {
+  Mamá: 'mother',
+  Papá: 'father',
+  'Tutor/a': 'guardian',
+};
 
 export function LinkParentModal({
   open,
   kidName,
+  childId,
   onClose,
-  onLink,
+  onSuccess,
 }: LinkParentModalProps) {
   const [parentName, setParentName] = useState('');
   const [email, setEmail] = useState('');
-  const [role, setRole] = useState<string>('Mamá');
+  const [role, setRole] = useState<RoleKey>('Mamá');
 
   const [nameError, setNameError] = useState('');
   const [emailError, setEmailError] = useState('');
   const [roleError, setRoleError] = useState('');
+  const [submitError, setSubmitError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     let valid = true;
     setNameError('');
     setEmailError('');
     setRoleError('');
+    setSubmitError('');
 
     if (!parentName.trim()) {
       setNameError('El nombre es obligatorio');
@@ -59,18 +67,22 @@ export function LinkParentModal({
 
     if (!valid) return;
 
-    const newParent: LinkedParent = {
-      name: parentName.trim(),
-      initial: parentName.trim().charAt(0).toUpperCase(),
-      role,
-      status: 'pending' as ParentStatus,
-      avatarBg: randomAvatarBg(),
-      avatarColor: randomAvatarColor(),
-    };
-
-    onLink(newParent);
-    resetForm();
-    onClose();
+    setIsSubmitting(true);
+    try {
+      await createInvitation({
+        childId,
+        parentName: parentName.trim(),
+        email: email.trim(),
+        relationship: ROLE_MAP[role],
+      });
+      resetForm();
+      onClose();
+      onSuccess();
+    } catch {
+      setSubmitError('No se pudo enviar la invitación. Intenta de nuevo.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const resetForm = () => {
@@ -80,21 +92,22 @@ export function LinkParentModal({
     setNameError('');
     setEmailError('');
     setRoleError('');
+    setSubmitError('');
   };
 
   const handleBackdropClick = (e: React.MouseEvent) => {
-    if (e.target === e.currentTarget) {
+    if (e.target === e.currentTarget && !isSubmitting) {
       onClose();
     }
   };
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
+      if (e.key === 'Escape' && !isSubmitting) {
         onClose();
       }
     },
-    [onClose],
+    [onClose, isSubmitting],
   );
 
   useEffect(() => {
@@ -130,7 +143,8 @@ export function LinkParentModal({
           <button
             type="button"
             onClick={onClose}
-            className="flex h-[34px] w-[34px] items-center justify-center rounded-[10px] bg-[#F0E6D8] text-[#94887B] hover:text-[#7A6E64]"
+            disabled={isSubmitting}
+            className="flex h-[34px] w-[34px] items-center justify-center rounded-[10px] bg-[#F0E6D8] text-[#94887B] hover:text-[#7A6E64] disabled:opacity-50"
           >
             <CloseIcon className="h-[18px] w-[18px]" />
           </button>
@@ -167,7 +181,8 @@ export function LinkParentModal({
             placeholder="Ej. Diego Fernández"
             value={parentName}
             onChange={(e) => setParentName(e.target.value)}
-            className="mb-1 w-full rounded-[14px] border-[1.5px] border-[#EADFD0] bg-white px-4 py-3 text-[15px] text-[#3F362E] placeholder:text-[#B6A99B]"
+            disabled={isSubmitting}
+            className="mb-1 w-full rounded-[14px] border-[1.5px] border-[#EADFD0] bg-white px-4 py-3 text-[15px] text-[#3F362E] placeholder:text-[#B6A99B] disabled:opacity-50"
           />
           {nameError && (
             <p className="mb-4 text-[13px] font-medium text-[#D9583C]">
@@ -184,7 +199,8 @@ export function LinkParentModal({
             placeholder="correo@ejemplo.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="mb-1 w-full rounded-[14px] border-[1.5px] border-[#EADFD0] bg-white px-4 py-3 text-[15px] text-[#3F362E] placeholder:text-[#B6A99B]"
+            disabled={isSubmitting}
+            className="mb-1 w-full rounded-[14px] border-[1.5px] border-[#EADFD0] bg-white px-4 py-3 text-[15px] text-[#3F362E] placeholder:text-[#B6A99B] disabled:opacity-50"
           />
           {emailError && (
             <p className="mb-4 text-[13px] font-medium text-[#D9583C]">
@@ -207,7 +223,8 @@ export function LinkParentModal({
                     setRole(r);
                     setRoleError('');
                   }}
-                  className="flex-1 rounded-full border-[1.5px] px-3 py-[11px] text-[14px] font-extrabold"
+                  disabled={isSubmitting}
+                  className="flex-1 rounded-full border-[1.5px] px-3 py-[11px] text-[14px] font-extrabold disabled:opacity-50"
                   style={{
                     background: isSelected ? '#CCD8F4' : '#FFFDF9',
                     borderColor: isSelected ? '#9FB8EC' : '#ECE0D0',
@@ -224,39 +241,38 @@ export function LinkParentModal({
               {roleError}
             </p>
           )}
-
-          {/* Invitation code */}
-          <div className="mb-5 rounded-[16px] border-[1.5px] border-dashed border-[#E6D08A] bg-[#FBF1D6] px-5 py-4 text-center">
-            <div className="mb-2 text-[12px] font-extrabold tracking-[0.7px] text-[#A88526]">
-              CÓDIGO DE INVITACIÓN
-            </div>
-            <div className="font-head text-[34px] font-semibold tracking-[7px] text-[#8A7234]">
-              7K4P9
-            </div>
-            <div className="mt-1.5 text-[13px] text-[#A88526]">
-              Vence en 7 días
-            </div>
-          </div>
+          {submitError && (
+            <p className="mb-4 text-[13px] font-medium text-[#D9583C]">
+              {submitError}
+            </p>
+          )}
 
           {/* Submit button */}
           <button
             type="button"
             onClick={handleSubmit}
-            className="flex w-full items-center justify-center gap-[9px] rounded-[14px] bg-gradient-to-b from-[#F4977E] to-[#EE8164] px-4 py-[14px] font-extrabold text-[15.5px] text-white shadow-[0_10px_22px_-8px_rgba(238,129,100,.7)]"
+            disabled={isSubmitting}
+            className="flex w-full items-center justify-center gap-[9px] rounded-[14px] bg-gradient-to-b from-[#F4977E] to-[#EE8164] px-4 py-[14px] font-extrabold text-[15.5px] text-white shadow-[0_10px_22px_-8px_rgba(238,129,100,.7)] disabled:opacity-70"
           >
-            <svg
-              className="h-[19px] w-[19px]"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="m22 2-7 20-4-9-9-4z" />
-              <path d="M22 2 11 13" />
-            </svg>
-            Enviar invitación
+            {isSubmitting ? (
+              'Enviando…'
+            ) : (
+              <>
+                <svg
+                  className="h-[19px] w-[19px]"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="m22 2-7 20-4-9-9-4z" />
+                  <path d="M22 2 11 13" />
+                </svg>
+                Enviar invitación
+              </>
+            )}
           </button>
         </div>
       </div>

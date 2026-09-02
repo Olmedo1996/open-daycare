@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import type { Database } from '@/types/database.types';
@@ -57,10 +57,24 @@ export function KidProfile({ kid, roomName, rooms }: KidProfileProps) {
   const router = useRouter();
   const [showLinkParent, setShowLinkParent] = useState(false);
   const [editingKid, setEditingKid] = useState(false);
+  const [toast, setToast] = useState<string | null>(null);
+  const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const hasAllergies = kid.allergy_tags.length > 0;
   const avatar = getAvatarColor(kid.id);
   const initial = kid.full_name.charAt(0).toUpperCase();
   const age = calculateAge(kid.birth_date);
+
+  const showToast = (message: string) => {
+    setToast(message);
+    if (toastTimer.current) clearTimeout(toastTimer.current);
+    toastTimer.current = setTimeout(() => setToast(null), 3500);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (toastTimer.current) clearTimeout(toastTimer.current);
+    };
+  }, []);
 
   const handleDelete = async () => {
     if (!confirm(`¿Eliminar a ${kid.full_name}? Esta acción no se puede deshacer.`)) {
@@ -232,8 +246,9 @@ export function KidProfile({ kid, roomName, rooms }: KidProfileProps) {
       <LinkParentModal
         open={showLinkParent}
         kidName={kid.full_name}
+        childId={kid.id}
         onClose={() => setShowLinkParent(false)}
-        onLink={() => {}}
+        onSuccess={() => showToast('Invitación enviada')}
       />
       <AddKidModal
         open={editingKid}
@@ -241,6 +256,22 @@ export function KidProfile({ kid, roomName, rooms }: KidProfileProps) {
         rooms={rooms}
         child={kid}
       />
+      {toast && (
+        <div className="fixed bottom-6 left-1/2 z-[60] flex -translate-x-1/2 items-center gap-2 rounded-full bg-[#3F362E] px-5 py-3 text-[14px] font-bold text-white shadow-[0_10px_24px_-10px_rgba(63,54,46,.6)]">
+          <svg
+            className="h-[18px] w-[18px] text-[#5FB97E]"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.4"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M20 6 9 17l-5-5" />
+          </svg>
+          {toast}
+        </div>
+      )}
     </div>
   );
 }

@@ -119,28 +119,28 @@ Los niños se obtienen del mock existente en `app/_data/kids.ts` (función `getK
 
 ## Acceptance criteria
 
-- [ ] El botón "Nueva publicación" en el sidebar es un `<button>` (no un `<a>`).
-- [ ] Click en "Nueva publicación" abre un modal dialog overlay.
-- [ ] El modal muestra un backdrop oscuro semitransparente detrás del formulario.
-- [ ] Click en el backdrop cierra el modal.
-- [ ] Presionar `Esc` cierra el modal.
-- [ ] Click en `Cancelar` cierra el modal.
-- [ ] El header del modal muestra `Cancelar` (izquierda), `Nueva publicación` (centro, Fredoka), `Publicar` (derecha, accent).
-- [ ] La sección PARA muestra botones pill por cada niño del mock + "Toda la sala".
-- [ ] Los botones de PARA funcionan como toggle (solo uno seleccionado a la vez).
-- [ ] Los niños en PARA muestran avatar con inicial, nombre y colores del mock.
-- [ ] La sección TIPO muestra 7 botones con labels en español: Comida, Siesta, Actividad, Logro, Ánimo, Foto, Anuncio (valores internos en inglés).
-- [ ] Los botones de TIPO funcionan como toggle (solo uno seleccionado a la vez).
-- [ ] Cada botón de TIPO tiene el color de fondo y texto del HTML de referencia.
-- [ ] La sección DESCRIPCIÓN muestra un textarea con placeholder "Contá cómo le fue hoy…".
-- [ ] La sección FOTOS muestra un placeholder de foto + botón "Agregar" con borde dashed.
-- [ ] Click en `Publicar` sin seleccionar destinatario no cierra el modal.
-- [ ] Click en `Publicar` sin seleccionar tipo no cierra el modal.
-- [ ] Click en `Publicar` con descripción vacía no cierra el modal.
-- [ ] Click en `Publicar` con todos los campos válidos cierra el modal.
-- [ ] `npm run lint` pasa sin errores.
-- [ ] `npx tsc --noEmit` pasa sin errores.
-- [ ] No hay errores en la consola del navegador al abrir y cerrar el modal.
+- [x] El botón "Nueva publicación" en el sidebar es un `<button>` (no un `<a>`).
+- [x] Click en "Nueva publicación" abre un modal dialog overlay.
+- [x] El modal muestra un backdrop oscuro semitransparente detrás del formulario.
+- [x] Click en el backdrop cierra el modal.
+- [x] Presionar `Esc` cierra el modal.
+- [x] Click en `Cancelar` cierra el modal.
+- [x] El header del modal muestra `Cancelar` (izquierda), `Nueva publicación` (centro, Fredoka), `Publicar` (derecha, accent).
+- [x] La sección PARA muestra botones pill por cada niño del mock + "Toda la sala".
+- [x] Los botones de PARA funcionan como toggle (solo uno seleccionado a la vez).
+- [x] Los niños en PARA muestran avatar con inicial, nombre y colores del mock.
+- [x] La sección TIPO muestra 7 botones con labels en español: Comida, Siesta, Actividad, Logro, Ánimo, Foto, Anuncio (valores internos en inglés).
+- [x] Los botones de TIPO funcionan como toggle (solo uno seleccionado a la vez).
+- [x] Cada botón de TIPO tiene el color de fondo y texto del HTML de referencia.
+- [x] La sección DESCRIPCIÓN muestra un textarea con placeholder "Contá cómo le fue hoy…".
+- [x] La sección FOTOS muestra un placeholder de foto + botón "Agregar" con borde dashed.
+- [x] Click en `Publicar` sin seleccionar destinatario no cierra el modal.
+- [x] Click en `Publicar` sin seleccionar tipo no cierra el modal.
+- [x] Click en `Publicar` con descripción vacía no cierra el modal.
+- [x] Click en `Publicar` con todos los campos válidos cierra el modal.
+- [x] `npm run lint` pasa sin errores.
+- [x] `npx tsc --noEmit` pasa sin errores.
+- [x] No hay errores en la consola del navegador al abrir y cerrar el modal.
 
 ## Decisions
 

@@ -49,22 +49,14 @@ export function NewPostModal({ open, onClose, onPublish }: NewPostModalProps) {
 
   const toggleTarget = (target: NewPostTarget) => {
     setSelectedTargets((prev) => {
-      if (target.type === 'all') {
-        if (prev.some((t) => t.type === 'all')) {
-          return prev.filter((t) => t.type !== 'all');
-        }
-        return [{ type: 'all', label: target.label }];
-      }
-      const isKidSelected = prev.some(
-        (t) => t.type === 'kid' && t.id === target.id,
-      );
-      const filtered = prev.filter(
-        (t) => t.type !== 'all' && !(t.type === 'kid' && t.id === target.id),
-      );
-      if (!isKidSelected) {
-        return [...filtered, target];
-      }
-      return filtered;
+      const isSelected = prev.some((t) => {
+        if (t.type === 'all' && target.type === 'all') return true;
+        if (t.type === 'kid' && target.type === 'kid') return t.id === target.id;
+        return false;
+      });
+      // Single-select: clicking the already-selected option deselects it,
+      // otherwise only this option stays selected.
+      return isSelected ? [] : [target];
     });
   };
 
@@ -95,6 +87,9 @@ export function NewPostModal({ open, onClose, onPublish }: NewPostModalProps) {
       onClick={handleBackdropClick}
     >
       <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="new-post-title"
         className="w-full max-w-[580px] rounded-[24px] border border-[#ECE0D0] bg-[#FBF4EC] shadow-[0_20px_50px_-24px_rgba(63,54,46,.35)]"
         style={{ overflow: 'hidden' }}
       >
@@ -107,7 +102,7 @@ export function NewPostModal({ open, onClose, onPublish }: NewPostModalProps) {
           >
             Cancelar
           </button>
-          <span className="font-head text-[18px] font-semibold text-[#3F362E]">
+          <span id="new-post-title" className="font-head text-[18px] font-semibold text-[#3F362E]">
             Nueva publicación
           </span>
           <button

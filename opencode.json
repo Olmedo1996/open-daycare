@@ -6,6 +6,7 @@
       "description": "Schema de base de datos, columnas y referencias a crear, esto no es no esta implementado en la base ded datos, solo es para referencia"
     }
   },
+  "formatter": true,
   "lsp": true,
   "permission": {
     "external_directory": {

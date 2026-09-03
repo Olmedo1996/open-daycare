@@ -9,6 +9,7 @@ import { Composer } from "@/components/home/Composer";
 import { FeedDivider } from "@/components/home/FeedDivider";
 import { PostCard } from "@/components/home/PostCard";
 import { NewPostModal } from "@/components/home/NewPostModal";
+import { PokemonViewer } from "@/components/shared/PokemonViewer";
 
 export default function Home() {
   const [showNewPost, setShowNewPost] = useState(false);
@@ -20,6 +21,7 @@ export default function Home() {
       <main className="flex-1 min-w-0 h-screen overflow-y-auto">
         <div className="max-w-[760px] w-full mx-auto px-5 md:px-10 pt-16 md:pt-[34px] pb-20">
           <FeedHeader />
+          <PokemonViewer />
           <Composer />
           <FeedDivider />
           <div className="flex flex-col gap-4">

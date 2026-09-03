@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useId } from 'react';
 import type { Database } from '@/types/database.types';
 import { useRouter } from 'next/navigation';
 import { createChild, updateChild } from '@/app/kids/actions';
@@ -37,7 +37,9 @@ const emptyDefaults = {
 export function AddKidModal({ open, onClose, rooms, child }: AddKidModalProps) {
   const router = useRouter();
   const isEditing = !!child;
-  const prevOpenRef = useRef(false);
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const restoreFocusRef = useRef<HTMLElement | null>(null);
+  const titleId = useId();
 
   const defaults = open && child ? getChildDefaults(child) : emptyDefaults;
 
@@ -52,8 +54,12 @@ export function AddKidModal({ open, onClose, rooms, child }: AddKidModalProps) {
   const [dateError, setDateError] = useState('');
   const [roomError, setRoomError] = useState('');
 
-  useEffect(() => {
-    if (open && !prevOpenRef.current) {
+  const sessionKey = open ? (child?.id ?? 'new') : null;
+  const [prevSessionKey, setPrevSessionKey] = useState(sessionKey);
+
+  if (sessionKey !== prevSessionKey) {
+    setPrevSessionKey(sessionKey);
+    if (open) {
       setFullName(defaults.fullName);
       setBirthDate(defaults.birthDate);
       setRoomId(defaults.roomId);
@@ -63,8 +69,24 @@ export function AddKidModal({ open, onClose, rooms, child }: AddKidModalProps) {
       setDateError('');
       setRoomError('');
     }
-    prevOpenRef.current = open;
-  }, [open, defaults]);
+  }
+
+  useEffect(() => {
+    if (!open) return;
+
+    restoreFocusRef.current =
+      document.activeElement instanceof HTMLElement
+        ? document.activeElement
+        : null;
+
+    dialogRef.current
+      ?.querySelector<HTMLElement>('input, select, textarea')
+      ?.focus();
+
+    return () => {
+      restoreFocusRef.current?.focus();
+    };
+  }, [open]);
 
   const handleDateChange = (value: string) => {
     const digits = value.replace(/\D/g, '').slice(0, 8);
@@ -142,6 +164,31 @@ export function AddKidModal({ open, onClose, rooms, child }: AddKidModalProps) {
     (e: KeyboardEvent) => {
       if (e.key === 'Escape' && !isSaving) {
         onClose();
+        return;
+      }
+
+      if (e.key !== 'Tab') return;
+
+      const dialog = dialogRef.current;
+      if (!dialog) return;
+
+      const focusable = dialog.querySelectorAll<HTMLElement>(
+        'button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled])',
+      );
+      if (focusable.length === 0) return;
+
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      const active = document.activeElement;
+
+      if (e.shiftKey) {
+        if (active === first || !dialog.contains(active)) {
+          e.preventDefault();
+          last.focus();
+        }
+      } else if (active === last || !dialog.contains(active)) {
+        e.preventDefault();
+        first.focus();
       }
     },
     [onClose, isSaving],
@@ -164,6 +211,10 @@ export function AddKidModal({ open, onClose, rooms, child }: AddKidModalProps) {
       onClick={handleBackdropClick}
     >
       <div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
         className="w-full max-w-[520px] rounded-[24px] border border-[#ECE0D0] bg-[#FBF4EC] shadow-[0_20px_50px_-24px_rgba(63,54,46,.35)]"
         style={{ overflow: 'hidden' }}
       >
@@ -176,8 +227,11 @@ export function AddKidModal({ open, onClose, rooms, child }: AddKidModalProps) {
           >
             Cancelar
           </button>
-          <span className="font-fredoka text-[18px] font-semibold text-[#3F362E]">
-            {isEditing ? 'Editar ni&ntilde;o' : 'Agregar ni&ntilde;o'}
+          <span
+            id={titleId}
+            className="font-fredoka text-[18px] font-semibold text-[#3F362E]"
+          >
+            {isEditing ? 'Editar niño' : 'Agregar niño'}
           </span>
           <button
             type="button"
@@ -195,7 +249,7 @@ export function AddKidModal({ open, onClose, rooms, child }: AddKidModalProps) {
           </label>
           <input
             type="text"
-            placeholder="Ej. Martina L&oacute;pez"
+            placeholder="Ej. Martina López"
             value={fullName}
             onChange={(e) => setFullName(e.target.value)}
             disabled={isSaving}
@@ -278,7 +332,7 @@ export function AddKidModal({ open, onClose, rooms, child }: AddKidModalProps) {
           </label>
           <input
             type="text"
-            placeholder="Ej. Man&iacute;, Lactosa"
+            placeholder="Ej. Maní, Lactosa"
             value={allergies}
             onChange={(e) => setAllergies(e.target.value)}
             disabled={isSaving}
@@ -286,10 +340,10 @@ export function AddKidModal({ open, onClose, rooms, child }: AddKidModalProps) {
           />
 
           <label className="mb-2 mt-4 block text-[12px] font-extrabold tracking-wide text-[#94887B]">
-            NOTAS M&Eacute;DICAS
+            NOTAS MÉDICAS
           </label>
           <textarea
-            placeholder="Indicaciones, medicaci&oacute;n, contactos&hellip;"
+            placeholder="Indicaciones, medicación, contactos…"
             value={medicalNotes}
             onChange={(e) => setMedicalNotes(e.target.value)}
             disabled={isSaving}

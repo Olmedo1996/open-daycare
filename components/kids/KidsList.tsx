@@ -2,8 +2,6 @@
 
 import { useState } from 'react';
 import type { Database } from '@/types/database.types';
-import { Sidebar } from '@/components/shared/Sidebar';
-import { MobileNav } from '@/components/shared/MobileNav';
 import { SearchIcon } from '@/components/shared/icons';
 import { KidCard } from '@/components/kids/KidCard';
 import { AddKidModal } from '@/components/kids/AddKidModal';
@@ -36,11 +34,8 @@ export function KidsList({ rooms, kidsData }: KidsListProps) {
   const unassigned = filtered.filter((kid) => kid.room_id === null);
 
   return (
-    <div className="flex flex-1 min-h-screen bg-canvas">
-      <Sidebar pathname="/kids" />
-      <MobileNav pathname="/kids" />
-      <main className="flex-1 min-w-0 h-screen overflow-y-auto">
-        <div className="max-w-[880px] w-full mx-auto px-5 md:px-10 pt-16 md:pt-[34px] pb-20">
+    <>
+      <div className="max-w-[880px] w-full mx-auto px-5 md:px-10 pt-16 md:pt-[34px] pb-20">
           <div className="flex items-end justify-between gap-4 mb-[22px]">
             <div>
               <div className="text-[12.5px] font-extrabold tracking-[0.8px] text-accent mb-1">
@@ -126,12 +121,11 @@ export function KidsList({ rooms, kidsData }: KidsListProps) {
               </div>
             )}
         </div>
-      </main>
       <AddKidModal
         open={showAddKid}
         onClose={() => setShowAddKid(false)}
         rooms={rooms}
       />
-    </div>
+    </>
   );
 }

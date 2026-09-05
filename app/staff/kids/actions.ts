@@ -63,8 +63,8 @@ export async function createInvitation(input: CreateInvitationInput) {
         code,
         activateUrl,
       })
-      revalidatePath('/kids')
-      revalidatePath(`/kids/${input.childId}`)
+      revalidatePath('/staff/kids')
+      revalidatePath(`/staff/kids/${input.childId}`)
       return
     }
 
@@ -95,7 +95,7 @@ export async function createChild(data: {
     medical_notes: data.medical_notes ?? '',
   })
   if (error) throw error
-  revalidatePath('/kids')
+  revalidatePath('/staff/kids')
 }
 
 export async function updateChild(
@@ -120,13 +120,13 @@ export async function updateChild(
     })
     .eq('id', id)
   if (error) throw error
-  revalidatePath('/kids')
-  revalidatePath(`/kids/${id}`)
+  revalidatePath('/staff/kids')
+  revalidatePath(`/staff/kids/${id}`)
 }
 
 export async function deleteChild(id: string) {
   const supabase = await createClient()
   const { error } = await supabase.from('children').delete().eq('id', id)
   if (error) throw error
-  revalidatePath('/kids')
+  revalidatePath('/staff/kids')
 }

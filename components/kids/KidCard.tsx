@@ -98,7 +98,7 @@ export function KidCard({ kid, onEdit }: KidCardProps) {
 
   return (
     <Link
-      href={`/kids/${kid.id}`}
+      href={`/staff/kids/${kid.id}`}
       className={cardClass}
     >
       <CardContent kid={kid} hasAllergies={hasAllergies} avatar={avatar} initial={initial} age={age} />

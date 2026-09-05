@@ -44,21 +44,47 @@ export const sidebarUser: SidebarUser = {
   initial: "C",
 };
 
+export const familySidebarUser: SidebarUser = {
+  name: "María López",
+  role: "Madre · Familia",
+  initial: "M",
+};
+
 export const roomSubtitle: string = "12 niños · martes 17 jun";
 
 export const navItems: NavItem[] = [
-  { label: "Feed", icon: "home", active: false, href: "/" },
-  { label: "Niños", icon: "kids", active: false, href: "/kids" },
+  { label: "Feed", icon: "home", active: false, href: "/staff/feed" },
+  { label: "Niños", icon: "kids", active: false, href: "/staff/kids" },
   { label: "Avisos", icon: "bell", active: false, href: "#" },
   { label: "Mi cuenta", icon: "user", active: false, href: "#" },
 ];
 
-export function getActiveNav(pathname: string): NavItem[] {
-  const items = navItems.map((item) => ({ ...item, active: false }));
-  if (pathname === '/' || pathname === '') {
-    items[0].active = true;
-  } else if (pathname.startsWith('/kids')) {
-    items[1].active = true;
+export const familyNavItems: NavItem[] = [
+  { label: "Feed", icon: "home", active: false, href: "/family/feed" },
+  { label: "Mis hijos", icon: "kids", active: false, href: "#" },
+  { label: "Avisos", icon: "bell", active: false, href: "/family/notifications" },
+  { label: "Mi cuenta", icon: "user", active: false, href: "/family/account" },
+];
+
+export type SidebarVariant = "staff" | "family";
+
+export function getActiveNav(pathname: string, variant: SidebarVariant = "staff"): NavItem[] {
+  const source = variant === "family" ? familyNavItems : navItems;
+  const items = source.map((item) => ({ ...item, active: false }));
+  if (variant === "staff") {
+    if (pathname === "/staff/feed") {
+      items[0].active = true;
+    } else if (pathname.startsWith("/staff/kids")) {
+      items[1].active = true;
+    }
+  } else {
+    if (pathname === "/family/feed") {
+      items[0].active = true;
+    } else if (pathname.startsWith("/family/notifications")) {
+      items[2].active = true;
+    } else if (pathname.startsWith("/family/account")) {
+      items[3].active = true;
+    }
   }
   return items;
 }

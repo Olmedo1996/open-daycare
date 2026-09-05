@@ -4,13 +4,11 @@ import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import type { Database } from '@/types/database.types';
-import { Sidebar } from '@/components/shared/Sidebar';
-import { MobileNav } from '@/components/shared/MobileNav';
 import { ChevronLeftIcon, AlertTriangleIcon, EditIcon } from '@/components/shared/icons';
 import { LinkParentModal } from '@/components/kids/LinkParentModal';
 import { AddKidModal } from '@/components/kids/AddKidModal';
 import { PARENT_STATUS_LABEL, PARENT_STATUS_BADGE } from '@/app/_data/kids';
-import { deleteChild } from '@/app/kids/actions';
+import { deleteChild } from '@/app/staff/kids/actions';
 
 type Child = Database['public']['Tables']['children']['Row'];
 type Room = Database['public']['Tables']['rooms']['Row'];
@@ -110,17 +108,14 @@ export function KidProfile({
       return;
     }
     await deleteChild(kid.id);
-    router.push('/kids');
+    router.push('/staff/kids');
   };
 
   return (
-    <div className="flex flex-1 min-h-screen bg-canvas">
-      <Sidebar pathname="/kids" />
-      <MobileNav pathname="/kids" />
-      <main className="flex-1 min-w-0 h-screen overflow-y-auto">
-        <div className="max-w-[820px] w-full mx-auto px-5 md:px-10 pt-16 md:pt-[34px] pb-20">
+    <>
+      <div className="max-w-[820px] w-full mx-auto px-5 md:px-10 pt-16 md:pt-[34px] pb-20">
           <Link
-            href="/kids"
+            href="/staff/kids"
             className="flex items-center gap-[7px] text-[#94887B] font-bold text-[14px] mb-5"
           >
             <ChevronLeftIcon className="w-[18px] h-[18px]" />
@@ -336,7 +331,6 @@ export function KidProfile({
             </div>
           </div>
         </div>
-      </main>
       <LinkParentModal
         open={showLinkParent}
         kidName={kid.full_name}
@@ -366,6 +360,6 @@ export function KidProfile({
           {toast}
         </div>
       )}
-    </div>
+    </>
   );
 }

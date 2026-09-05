@@ -1,21 +1,25 @@
+import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
-import { getPosts, getChildren } from '@/lib/actions/posts';
-import { FeedClient } from '@/components/home/FeedClient';
+import { getDashboardPath } from '@/lib/actions/auth';
 
-export default async function Home() {
+export default async function RootPage() {
   const supabase = await createClient();
+
   const { data: { user } } = await supabase.auth.getUser();
 
-  const [{ data: posts }, { data: children }] = await Promise.all([
-    getPosts(),
-    getChildren(),
-  ]);
+  if (!user) {
+    redirect('/login');
+  }
 
-  return (
-    <FeedClient
-      posts={posts}
-      availableChildren={children}
-      currentUserId={user?.id ?? ''}
-    />
-  );
+  const { data: userProfile } = await supabase
+    .from('users')
+    .select('role')
+    .eq('id', user.id)
+    .single();
+
+  if (!userProfile) {
+    redirect('/activate');
+  }
+
+  redirect(await getDashboardPath(userProfile.role));
 }

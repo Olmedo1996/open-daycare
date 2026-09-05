@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { getActiveNav, sidebarUser } from '@/app/_data/mock';
+import { getActiveNav, sidebarUser, familySidebarUser } from '@/app/_data/mock';
 import { signOutAction } from '@/lib/actions/auth';
 import {
   BellIcon,
@@ -10,7 +10,7 @@ import {
   SunIcon,
   UserIcon,
 } from '@/components/shared/icons';
-import type { NavIcon } from '@/app/_data/mock';
+import type { NavIcon, SidebarVariant } from '@/app/_data/mock';
 
 const navIcon: Record<NavIcon, typeof HomeIcon> = {
   home: HomeIcon,
@@ -21,17 +21,20 @@ const navIcon: Record<NavIcon, typeof HomeIcon> = {
 
 export function SidebarContent({
   pathname,
+  variant = 'staff',
   onOpenNewPost,
 }: {
   pathname?: string;
+  variant?: SidebarVariant;
   onOpenNewPost?: () => void;
 }) {
-  const items = pathname ? getActiveNav(pathname) : [];
+  const items = pathname ? getActiveNav(pathname, variant) : [];
+  const user = variant === 'family' ? familySidebarUser : sidebarUser;
 
   return (
     <>
       <Link
-        href="/"
+        href={variant === 'family' ? '/family/feed' : '/staff/feed'}
         className="flex items-center gap-[11px] pt-1 px-2 pb-[22px]"
       >
         <span className="w-[38px] h-[38px] rounded-[12px] bg-[linear-gradient(155deg,#F8C3A8,#F2937A)] flex items-center justify-center shrink-0 text-white">
@@ -47,14 +50,16 @@ export function SidebarContent({
         </span>
       </Link>
 
-      <button
-        type="button"
-        onClick={onOpenNewPost}
-        className="flex items-center justify-center gap-2 w-full p-3 rounded-[14px] text-white font-extrabold text-[14.5px] mb-[18px] bg-[linear-gradient(180deg,#F4977E,#EE8164)] shadow-[0_8px_18px_-8px_rgba(238,129,100,0.75)]"
-      >
-        <PlusIcon className="w-[17px] h-[17px]" />
-        Nueva publicación
-      </button>
+      {variant === 'staff' && (
+        <button
+          type="button"
+          onClick={() => onOpenNewPost?.()}
+          className="flex items-center justify-center gap-2 w-full p-3 rounded-[14px] text-white font-extrabold text-[14.5px] mb-[18px] bg-[linear-gradient(180deg,#F4977E,#EE8164)] shadow-[0_8px_18px_-8px_rgba(238,129,100,0.75)]"
+        >
+          <PlusIcon className="w-[17px] h-[17px]" />
+          Nueva publicación
+        </button>
+      )}
 
       <nav className="flex flex-col gap-1 flex-1">
         {items.map((item) => {
@@ -80,14 +85,14 @@ export function SidebarContent({
       <div className="border-t border-line pt-[14px] mt-[10px]">
         <div className="flex items-center gap-[11px] py-[6px] px-2">
           <span className="w-[38px] h-[38px] rounded-full bg-accent-soft text-white font-head font-semibold text-[16px] flex items-center justify-center shrink-0">
-            {sidebarUser.initial}
+            {user.initial}
           </span>
           <span className="flex-1 min-w-0">
             <span className="block font-extrabold text-[14px] text-ink">
-              {sidebarUser.name}
+              {user.name}
             </span>
             <span className="block text-[12px] text-muted">
-              {sidebarUser.role}
+              {user.role}
             </span>
           </span>
           <form action={signOutAction}>
@@ -108,14 +113,16 @@ export function SidebarContent({
 
 export function Sidebar({
   pathname,
+  variant = 'staff',
   onOpenNewPost,
 }: {
   pathname?: string;
+  variant?: SidebarVariant;
   onOpenNewPost?: () => void;
 }) {
   return (
     <aside className="hidden md:flex flex-col w-[248px] shrink-0 bg-card border-r border-line sticky top-0 h-screen py-6 px-4">
-      <SidebarContent pathname={pathname} onOpenNewPost={onOpenNewPost} />
+      <SidebarContent pathname={pathname} variant={variant} onOpenNewPost={onOpenNewPost} />
     </aside>
   );
 }

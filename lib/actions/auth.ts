@@ -6,6 +6,16 @@ import { createClient } from '@/lib/supabase/server';
 
 export type LoginState = { error: string | null };
 
+export async function getDashboardPath(role: string): Promise<string> {
+  if (role === 'staff' || role === 'admin') {
+    return '/staff/feed';
+  }
+  if (role === 'parent') {
+    return '/family/feed';
+  }
+  return '/activate';
+}
+
 export async function signInAction(
   _prevState: LoginState,
   formData: FormData,
@@ -21,7 +31,23 @@ export async function signInAction(
     return { error: 'Email o contraseña incorrectos' };
   }
 
-  redirect('/');
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect('/activate');
+  }
+
+  const { data: userProfile } = await supabase
+    .from('users')
+    .select('role')
+    .eq('id', user.id)
+    .single();
+
+  if (!userProfile) {
+    redirect('/activate');
+  }
+
+  redirect(await getDashboardPath(userProfile.role));
 }
 
 export async function signOutAction(): Promise<void> {

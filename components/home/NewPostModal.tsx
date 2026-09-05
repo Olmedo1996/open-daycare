@@ -43,60 +43,29 @@ export function NewPostModal({ open, onClose, onPublish, post }: NewPostModalPro
   const isEditing = !!post;
   const targets = getNewPostTargets();
 
-  const [selectedTargets, setSelectedTargets] = useState<NewPostTarget[]>([]);
-  const [selectedType, setSelectedType] = useState<NewPostType | null>(null);
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [isPublic, setIsPublic] = useState(true);
+  const [selectedTargets, setSelectedTargets] = useState<NewPostTarget[]>(() => {
+    if (!post) return [];
+    return post.children.map((pc) => ({
+      type: 'kid' as const,
+      id: pc.child.id,
+      name: pc.child.full_name,
+      initial: pc.child.full_name.charAt(0),
+      avatarBg: '#A9D9E8',
+      avatarColor: '#1F7A93',
+    }));
+  });
+  const [selectedType, setSelectedType] = useState<NewPostType | null>(
+    () => post ? (POST_TYPE_REVERSE[post.type] ?? 'activity') : null,
+  );
+  const [title, setTitle] = useState(post?.title ?? '');
+  const [description, setDescription] = useState(post?.body ?? '');
+  const [isPublic, setIsPublic] = useState(post?.is_public ?? true);
   const [photos, setPhotos] = useState<File[]>([]);
   const [deletedPhotoIds, setDeletedPhotoIds] = useState<string[]>([]);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const existingPhotos: ExistingPhoto[] = post?.photos ?? [];
-
-  const resetForm = () => {
-    setSelectedTargets([]);
-    setSelectedType(null);
-    setTitle('');
-    setDescription('');
-    setIsPublic(true);
-    setPhotos([]);
-    setDeletedPhotoIds([]);
-    setError(null);
-  };
-
-  useEffect(() => {
-    if (!open) {
-      resetForm();
-    }
-  }, [open]);
-
-  useEffect(() => {
-    if (open && post) {
-      const newType = POST_TYPE_REVERSE[post.type] ?? 'activity';
-      setSelectedType(newType);
-
-      setTitle(post.title ?? '');
-      setDescription(post.body);
-      setIsPublic(post.is_public);
-
-      const kidTargets = post.children.map((pc) => {
-        const target = targets.find(
-          (t) => t.type === 'kid' && t.id === pc.child.id,
-        );
-        return target ?? {
-          type: 'kid' as const,
-          id: pc.child.id,
-          name: pc.child.full_name,
-          initial: pc.child.full_name.charAt(0),
-          avatarBg: '#A9D9E8',
-          avatarColor: '#1F7A93',
-        };
-      });
-      setSelectedTargets(kidTargets);
-    }
-  }, [open, post, targets]);
 
   const handleBackdropClick = (e: React.MouseEvent) => {
     if (e.target === e.currentTarget && !isSaving) {
@@ -161,15 +130,11 @@ export function NewPostModal({ open, onClose, onPublish, post }: NewPostModalPro
         .filter((t) => t.type === 'kid')
         .map((t) => t.id);
 
-      const roomId = selectedTargets.some((t) => t.type === 'all')
-        ? undefined
-        : undefined;
-
       const base = {
         type: POST_TYPE_MAP[selectedType],
         title: title.trim() || undefined,
         body: description.trim(),
-        room_id: roomId,
+        room_id: undefined,
         is_public: isPublic,
         child_ids: childIds.length > 0 ? childIds : undefined,
       };

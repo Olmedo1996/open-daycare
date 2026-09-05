@@ -113,7 +113,10 @@ export function PhotoUpload({
   };
 
   return (
-    <div>
+    <div
+      onDrop={handleDrop}
+      onDragOver={handleDragOver}
+    >
       <div className="flex flex-wrap gap-3">
         {/* Existing photos */}
         {existingPhotos.map((photo) => (

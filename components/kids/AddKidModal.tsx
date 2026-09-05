@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import type { Database } from '@/types/database.types';
 import { useRouter } from 'next/navigation';
-import { createChild, updateChild } from '@/app/kids/actions';
+import { createChild, updateChild } from '@/app/staff/kids/actions';
 
 type Room = Database['public']['Tables']['rooms']['Row'];
 type Child = Database['public']['Tables']['children']['Row'];

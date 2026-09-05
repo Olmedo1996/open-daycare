@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { CloseIcon } from '@/components/shared/icons';
 import { isValidEmail } from '@/app/_data/kids';
-import { createInvitation } from '@/app/kids/actions';
+import { createInvitation } from '@/app/staff/kids/actions';
 
 interface LinkParentModalProps {
   open: boolean;

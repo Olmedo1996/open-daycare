@@ -3,12 +3,14 @@
 import { useEffect, useState } from 'react';
 import { SidebarContent } from '@/components/shared/Sidebar';
 import { CloseIcon, MenuIcon } from '@/components/shared/icons';
+import type { SidebarVariant } from '@/app/_data/mock';
 
 interface MobileNavProps {
   pathname?: string;
+  variant?: SidebarVariant;
 }
 
-export function MobileNav({ pathname }: MobileNavProps) {
+export function MobileNav({ pathname, variant = 'staff' }: MobileNavProps) {
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
@@ -55,7 +57,7 @@ export function MobileNav({ pathname }: MobileNavProps) {
             >
               <CloseIcon className="w-4 h-4" />
             </button>
-            <SidebarContent pathname={pathname} />
+            <SidebarContent pathname={pathname} variant={variant} />
           </aside>
         </div>
       )}

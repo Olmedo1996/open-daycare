@@ -1,0 +1,30 @@
+schema: spec-driven
+
+context: |
+  OpenDayCare: app de gestión de guardería en español. Dos roles: Staff (trabajadores de la guardería) y Familia/Padre (padres de familia).
+  Permite al staff publicar momentos del día de los niños (feed, fotos, comentarios), gestionar perfiles infantiles (datos, alergias, padres vinculados), y enviar resúmenes diarios a las familias. Los padres ven el feed de sus hijos, reaccionan, comentan y reciben el cierre del día.
+  Tech stack: Next.js 16 (App Router), React 19, TypeScript, Tailwind CSS v4, Supabase (Postgres + Auth + Storage).
+  UI en español. Paleta cálida: background #f6ecdf, accent #d9583c/#f2937a, staff blue #2e89a6, family purple #7b5fc0. Tipografía: Fredoka (headings) + Nunito (body).
+  15 pantallas de diseño en references/pantallas/.
+
+# Per-artifact rules (optional)
+# Add custom rules for specific artifacts.
+# Example:
+#   rules:
+#     proposal:
+#       - Keep proposals under 500 words
+#       - Always include a "Non-goals" section
+#     tasks:
+#       - Break tasks into chunks of max 2 hours
+
+# Per-operation guidance (optional)
+# Add advisory guidance for how apply and archive work should be conducted.
+# This is separate from artifact rules above.
+# Example:
+#   operations:
+#     apply:
+#       guidance:
+#         - Keep test summaries concise
+#     archive:
+#       guidance:
+#         - Summarize the archive outcome before finishing

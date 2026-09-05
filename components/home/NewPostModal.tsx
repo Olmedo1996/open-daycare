@@ -5,11 +5,10 @@ import { useRouter } from 'next/navigation';
 import {
   NEW_POST_TYPE_LABEL,
   NEW_POST_TYPE_COLORS,
-  getNewPostTargets,
   type NewPostType,
   type NewPostTarget,
 } from '@/app/_data/newPost';
-import { createPost, updatePost, type PostWithDetails } from '@/lib/actions/posts';
+import { createPost, updatePost, type PostWithDetails, type ChildOption } from '@/lib/actions/posts';
 import { PhotoUpload, type ExistingPhoto } from '@/components/home/PhotoUpload';
 
 const POST_TYPE_MAP: Record<NewPostType, PostWithDetails['type']> = {
@@ -36,12 +35,24 @@ interface NewPostModalProps {
   onClose: () => void;
   onPublish: () => void;
   post?: PostWithDetails;
+  availableChildren?: ChildOption[];
 }
 
-export function NewPostModal({ open, onClose, onPublish, post }: NewPostModalProps) {
+export function NewPostModal({ open, onClose, onPublish, post, availableChildren = [] }: NewPostModalProps) {
   const router = useRouter();
   const isEditing = !!post;
-  const targets = getNewPostTargets();
+
+  const targets: NewPostTarget[] = [
+    ...availableChildren.map((child) => ({
+      type: 'kid' as const,
+      id: child.id,
+      name: child.full_name,
+      initial: child.full_name.charAt(0),
+      avatarBg: '#A9D9E8',
+      avatarColor: '#1F7A93',
+    })),
+    { type: 'all' as const, label: 'Toda la sala' },
+  ];
 
   const [selectedTargets, setSelectedTargets] = useState<NewPostTarget[]>(() => {
     if (!post) return [];

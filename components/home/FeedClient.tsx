@@ -8,14 +8,15 @@ import { Composer } from '@/components/home/Composer';
 import { FeedDivider } from '@/components/home/FeedDivider';
 import { PostCard } from '@/components/home/PostCard';
 import { NewPostModal } from '@/components/home/NewPostModal';
-import type { PostWithDetails } from '@/lib/actions/posts';
+import type { PostWithDetails, ChildOption } from '@/lib/actions/posts';
 
 interface FeedClientProps {
   posts: PostWithDetails[];
+  availableChildren: ChildOption[];
   currentUserId: string;
 }
 
-export function FeedClient({ posts, currentUserId }: FeedClientProps) {
+export function FeedClient({ posts, availableChildren, currentUserId }: FeedClientProps) {
   const [showNewPost, setShowNewPost] = useState(false);
   const [editingPost, setEditingPost] = useState<PostWithDetails | null>(null);
 
@@ -44,12 +45,14 @@ export function FeedClient({ posts, currentUserId }: FeedClientProps) {
         open={showNewPost}
         onClose={() => setShowNewPost(false)}
         onPublish={() => setShowNewPost(false)}
+        availableChildren={availableChildren}
       />
       <NewPostModal
         open={!!editingPost}
         onClose={() => setEditingPost(null)}
         onPublish={() => setEditingPost(null)}
         post={editingPost ?? undefined}
+        availableChildren={availableChildren}
       />
     </div>
   );

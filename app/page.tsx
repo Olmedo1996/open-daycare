@@ -1,16 +1,20 @@
 import { createClient } from '@/lib/supabase/server';
-import { getPosts } from '@/lib/actions/posts';
+import { getPosts, getChildren } from '@/lib/actions/posts';
 import { FeedClient } from '@/components/home/FeedClient';
 
 export default async function Home() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
-  const { data: posts } = await getPosts();
+  const [{ data: posts }, { data: children }] = await Promise.all([
+    getPosts(),
+    getChildren(),
+  ]);
 
   return (
     <FeedClient
       posts={posts}
+      availableChildren={children}
       currentUserId={user?.id ?? ''}
     />
   );

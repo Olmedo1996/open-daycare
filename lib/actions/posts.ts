@@ -393,3 +393,27 @@ export async function deletePost(
 
   return { error: null };
 }
+
+// ---------- Children ----------
+
+export type ChildOption = {
+  id: string;
+  full_name: string;
+};
+
+export async function getChildren(): Promise<{
+  data: ChildOption[];
+  error: string | null;
+}> {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from('children')
+    .select('id, full_name')
+    .eq('status', 'active')
+    .order('full_name');
+
+  if (error) return { data: [], error: error.message };
+
+  return { data: data ?? [], error: null };
+}

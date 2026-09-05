@@ -131,83 +131,95 @@ CREATE POLICY "posts_delete_author"
   FOR DELETE TO authenticated
   USING (author_id = auth.uid());
 
--- Políticas RLS — post_children
+-- Políticas RLS — post_children (sin recursión sobre posts)
+-- SELECT: staff ve todo de su daycare, padre ve si es su hijo
 CREATE POLICY "post_children_select"
   ON public.post_children
   FOR SELECT TO authenticated
   USING (
     EXISTS (
-      SELECT 1 FROM public.posts p
-      WHERE p.id = post_id
-        AND (
-          p.is_public = true
-          OR p.author_id = auth.uid()
-          OR EXISTS (
-            SELECT 1 FROM public.parent_children pc
-            WHERE pc.child_id = post_children.child_id
-              AND pc.parent_id = auth.uid()
-          )
-        )
+      SELECT 1 FROM public.users u
+      WHERE u.id = auth.uid()
+        AND u.role IN ('staff', 'admin')
+        AND u.daycare_id = public.get_my_daycare_id()
+    )
+    OR
+    EXISTS (
+      SELECT 1 FROM public.parent_children pc
+      WHERE pc.child_id = post_children.child_id
+        AND pc.parent_id = auth.uid()
     )
   );
 
+-- INSERT: solo staff puede vincular niños a posts
 CREATE POLICY "post_children_insert"
   ON public.post_children
   FOR INSERT TO authenticated
   WITH CHECK (
     EXISTS (
-      SELECT 1 FROM public.posts p
-      WHERE p.id = post_id AND p.author_id = auth.uid()
+      SELECT 1 FROM public.users u
+      WHERE u.id = auth.uid()
+        AND u.role IN ('staff', 'admin')
+        AND u.daycare_id = public.get_my_daycare_id()
     )
   );
 
+-- DELETE: solo staff puede desvincular niños de posts
 CREATE POLICY "post_children_delete"
   ON public.post_children
   FOR DELETE TO authenticated
   USING (
     EXISTS (
-      SELECT 1 FROM public.posts p
-      WHERE p.id = post_id AND p.author_id = auth.uid()
+      SELECT 1 FROM public.users u
+      WHERE u.id = auth.uid()
+        AND u.role IN ('staff', 'admin')
+        AND u.daycare_id = public.get_my_daycare_id()
     )
   );
 
--- Políticas RLS — post_photos
+-- Políticas RLS — post_photos (sin recursión sobre posts)
+-- SELECT: staff ve todo de su daycare, padre ve si es hijo asociado al post
 CREATE POLICY "post_photos_select"
   ON public.post_photos
   FOR SELECT TO authenticated
   USING (
     EXISTS (
-      SELECT 1 FROM public.posts p
-      WHERE p.id = post_id
-        AND (
-          p.is_public = true
-          OR p.author_id = auth.uid()
-          OR EXISTS (
-            SELECT 1 FROM public.parent_children pc
-            JOIN public.post_children pch ON pch.child_id = pc.child_id
-            WHERE pch.post_id = p.id
-              AND pc.parent_id = auth.uid()
-          )
-        )
+      SELECT 1 FROM public.users u
+      WHERE u.id = auth.uid()
+        AND u.role IN ('staff', 'admin')
+        AND u.daycare_id = public.get_my_daycare_id()
+    )
+    OR
+    EXISTS (
+      SELECT 1 FROM public.post_children pch
+      JOIN public.parent_children pc ON pc.child_id = pch.child_id
+      WHERE pch.post_id = post_photos.post_id
+        AND pc.parent_id = auth.uid()
     )
   );
 
+-- INSERT: solo staff puede subir fotos
 CREATE POLICY "post_photos_insert"
   ON public.post_photos
   FOR INSERT TO authenticated
   WITH CHECK (
     EXISTS (
-      SELECT 1 FROM public.posts p
-      WHERE p.id = post_id AND p.author_id = auth.uid()
+      SELECT 1 FROM public.users u
+      WHERE u.id = auth.uid()
+        AND u.role IN ('staff', 'admin')
+        AND u.daycare_id = public.get_my_daycare_id()
     )
   );
 
+-- DELETE: solo staff puede eliminar fotos
 CREATE POLICY "post_photos_delete"
   ON public.post_photos
   FOR DELETE TO authenticated
   USING (
     EXISTS (
-      SELECT 1 FROM public.posts p
-      WHERE p.id = post_id AND p.author_id = auth.uid()
+      SELECT 1 FROM public.users u
+      WHERE u.id = auth.uid()
+        AND u.role IN ('staff', 'admin')
+        AND u.daycare_id = public.get_my_daycare_id()
     )
   );
